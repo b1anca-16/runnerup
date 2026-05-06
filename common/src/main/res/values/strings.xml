@@ -363,6 +363,9 @@
   <string name="Activity_ongoing">Activity ongoing</string>
   <string name="Activity_paused">Activity paused</string>
   <string name="Activity_stopped">Activity stopped</string>
+  <string name="community_run">Community Lauf</string>
+  <string name="create_run">Lauf erstellen</string>
+  <string name="join_run">Lauf beitreten</string>
 
   <!--Name of sports, these deprecate array.sportEntries -->
   <string name="SPORT_RUNNING">Running</string>
