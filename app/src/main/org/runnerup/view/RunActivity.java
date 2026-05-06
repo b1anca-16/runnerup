@@ -202,7 +202,23 @@ public class RunActivity extends AppCompatActivity implements TickListener {
     ViewUtil.Insets(findViewById(R.id.start_view), true);
 
     challenge = new LiveChallenge();
-    challenge.connect("ABC123");
+    challenge.connect("ws://10.0.2.2:8080", new LiveChallenge.OnTokenReceived() {
+      @Override
+      public void onToken(String token) {
+        // Room wurde erstellt oder beigetreten
+        Log.d("LiveChallenge", "Token: " + token);
+      }
+
+      @Override
+      public void onPartnerJoined() {
+        Log.d("LiveChallenge", "Partner beigetreten!");
+      }
+
+      @Override
+      public void onError(String message) {
+        Log.e("LiveChallenge", "Fehler: " + message);
+      }
+    });
   }
 
   private boolean isLargeScreen() {

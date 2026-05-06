@@ -6,12 +6,19 @@ import android.util.Log;
 public class LiveChallenge {
     private WebSocket ws;
     private String roomId;
+    private OnTokenReceived tokenCallback;
 
-    public void connect(String roomId) {
-        this.roomId = roomId;
+    public interface OnTokenReceived {
+        void onToken(String token);
+        void onPartnerJoined();
+        void onError(String message);
+    }
+
+    public void connect(String serverUrl, OnTokenReceived callback) {
+        this.tokenCallback = callback;
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
-                .url("ws://10.0.2.2:8080")
+                .url(serverUrl)
                 .build();
 
         ws = client.newWebSocket(request, new WebSocketListener() {
@@ -23,8 +30,23 @@ public class LiveChallenge {
             @Override
             public void onMessage(WebSocket ws, String text) {
                 Log.d("LiveChallenge", "Empfangen: " + text);
-                // Hier kommt Pace / Distanz des Partners an
-                // → gleich weitergeben an RunActivity
+                // JSON parsen
+                if (text.contains("\"action\":\"created\"")) {
+                    String token = text.split("\"token\":\"")[1].replace("\"}", "");
+                    roomId = token;
+                    if (tokenCallback != null) tokenCallback.onToken(token);
+
+                } else if (text.contains("\"action\":\"joined\"")) {
+                    String token = text.split("\"token\":\"")[1].replace("\"}", "");
+                    roomId = token;
+                    if (tokenCallback != null) tokenCallback.onToken(token);
+
+                } else if (text.contains("\"action\":\"partner_joined\"")) {
+                    if (tokenCallback != null) tokenCallback.onPartnerJoined();
+
+                } else if (text.contains("\"action\":\"error\"")) {
+                    if (tokenCallback != null) tokenCallback.onError("Room nicht gefunden");
+                }
             }
 
             @Override
@@ -32,6 +54,14 @@ public class LiveChallenge {
                 Log.e("LiveChallenge", "Fehler: " + t.getMessage());
             }
         });
+    }
+
+    public void createRoom() {
+        ws.send("{\"action\":\"create\"}");
+    }
+
+    public void joinRoom(String token) {
+        ws.send("{\"action\":\"join\",\"room\":\"" + token + "\"}");
     }
 
     public void sendUpdate(double km, double pace, double timeSeconds) {
@@ -47,14 +77,5 @@ public class LiveChallenge {
 
     public void disconnect() {
         ws.close(1000, "Session ended");
-    }
-
-    public void createRoom() {
-        ws.send("{\"action\":\"create\"}");
-    }
-
-    public void joinRoom(String token) {
-        this.roomId = token;
-        ws.send("{\"action\":\"join\",\"room\":\"" + token + "\"}");
     }
 }
