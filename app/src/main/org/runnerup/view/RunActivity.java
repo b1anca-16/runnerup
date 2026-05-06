@@ -30,6 +30,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -69,6 +70,7 @@ import org.runnerup.workout.Intensity;
 import org.runnerup.workout.Scope;
 import org.runnerup.workout.Step;
 import org.runnerup.workout.Workout;
+import org.runnerup.tracker.LiveChallenge;
 
 public class RunActivity extends AppCompatActivity implements TickListener {
   private Workout workout = null;
@@ -197,6 +199,15 @@ public class RunActivity extends AppCompatActivity implements TickListener {
               }
             });
     ViewUtil.Insets(findViewById(R.id.start_view), true);
+
+    Toast.makeText(this, "RunActivity gestartet! ✅", Toast.LENGTH_LONG).show();
+
+    LiveChallenge challenge = new LiveChallenge();
+    challenge.connect("ABC123");
+
+    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+      challenge.sendUpdate(3.4, 5.2);
+    }, 3000);
   }
 
   private boolean isLargeScreen() {
