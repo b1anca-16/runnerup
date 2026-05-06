@@ -96,6 +96,7 @@ public class RunActivity extends AppCompatActivity implements TickListener {
   private Formatter formatter = null;
   private TextView activityHr;
   private TextView lapHr;
+  private LiveChallenge challenge;
   private TextView intervalHr;
   private TextView currentHr;
   private TextView activityHeaderHr;
@@ -200,14 +201,8 @@ public class RunActivity extends AppCompatActivity implements TickListener {
             });
     ViewUtil.Insets(findViewById(R.id.start_view), true);
 
-    Toast.makeText(this, "RunActivity gestartet! ✅", Toast.LENGTH_LONG).show();
-
-    LiveChallenge challenge = new LiveChallenge();
+    challenge = new LiveChallenge();
     challenge.connect("ABC123");
-
-    new Handler(Looper.getMainLooper()).postDelayed(() -> {
-      challenge.sendUpdate(3.4, 5.2);
-    }, 3000);
   }
 
   private boolean isLargeScreen() {
@@ -308,6 +303,13 @@ public class RunActivity extends AppCompatActivity implements TickListener {
     if (workout != null) {
       workout.onTick();
       updateView();
+
+      if (challenge != null) {
+        double km = workout.getDistance(Scope.ACTIVITY);
+        double pace = workout.getSpeed(Scope.CURRENT);
+        double time = workout.getTime(Scope.ACTIVITY);
+        challenge.sendUpdate(km, pace, time);
+      }
 
       if (mTracker != null) {
         Location l2 = mTracker.getLastKnownLocation();

@@ -29,14 +29,20 @@ public class LiveChallenge {
 
             @Override
             public void onFailure(WebSocket ws, Throwable t, Response response) {
-                Log.e("LiveChallenge", "Fehler: " + t.getMessage()); // ❌
+                Log.e("LiveChallenge", "Fehler: " + t.getMessage());
             }
         });
     }
 
-    public void sendUpdate(double km, double pace) {
-        ws.send("{\"room\":\"" + roomId + "\","
-                + "\"data\":{\"km\":" + km + ",\"pace\":" + pace + "}}");
+    public void sendUpdate(double km, double pace, double timeSeconds) {
+        String json = "{\"room\":\"" + roomId + "\","
+                + "\"data\":{"
+                + "\"km\":" + km + ","
+                + "\"pace\":" + pace + ","
+                + "\"time\":" + timeSeconds
+                + "}}";
+        ws.send(json);
+        Log.d("LiveChallenge", "Gesendet: " + json);
     }
 
     public void disconnect() {
