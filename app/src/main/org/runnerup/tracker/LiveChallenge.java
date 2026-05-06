@@ -48,4 +48,13 @@ public class LiveChallenge {
     public void disconnect() {
         ws.close(1000, "Session ended");
     }
+
+    public void createRoom() {
+        ws.send("{\"action\":\"create\"}");
+    }
+
+    public void joinRoom(String token) {
+        this.roomId = token;
+        ws.send("{\"action\":\"join\",\"room\":\"" + token + "\"}");
+    }
 }
