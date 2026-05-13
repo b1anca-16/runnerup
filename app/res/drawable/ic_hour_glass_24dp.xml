@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item>
+        <vector
+            android:width="24dp"
+            android:height="24dp"
+            android:viewportWidth="24"
+            android:viewportHeight="24">
+
+            <!-- Oberer Balken -->
+            <path
+                android:fillColor="#607D8B"
+                android:pathData="M2,2h10
+                                  a1,1 0 0 1 1,1
+                                  a1,1 0 0 1 -1,1
+                                  H2
+                                  a1,1 0 0 1 -1,-1
+                                  a1,1 0 0 1 1,-1z" />
+
+            <!-- Äußerer Rahmen der Sanduhr (symmetrisch angepasst) -->
+            <path
+                android:fillColor="#ECEFF1"
+                android:pathData="M3,4
+                                  H11
+                                  C11,6 9.8,8 8.2,10
+                                  L7,11
+                                  L8.2,12
+                                  C9.8,14 11,16 11,18
+                                  V20
+                                  H3
+                                  V18
+                                  C3,16 4.2,14 5.8,12
+                                  L7,11
+                                  L5.8,10
+                                  C4.2,8 3,6 3,4z" />
+
+            <!-- Oberer Sand (angepasst auf gleiche Höhe wie unten) -->
+            <path
+                android:fillColor="#B0BEC5"
+                android:pathData="M4.2,5
+                                  H9.8
+                                  C9.6,6.5 8.8,8 7,9.5
+                                  C5.2,8 4.4,6.5 4.2,5z" />
+
+            <!-- Unterer Sand (gleich groß wie oberer Sand) -->
+            <path
+                android:fillColor="#B0BEC5"
+                android:pathData="M7,12.5
+                                  C8.8,14 9.6,15.5 9.8,17
+                                  H4.2
+                                  C4.4,15.5 5.2,14 7,12.5z" />
+
+            <!-- Unterer Balken -->
+            <path
+                android:fillColor="#607D8B"
+                android:pathData="M2,18h10
+                                  a1,1 0 0 1 1,1
+                                  a1,1 0 0 1 -1,1
+                                  H2
+                                  a1,1 0 0 1 -1,-1
+                                  a1,1 0 0 1 1,-1z" />
+
+            <!-- Uhr-Kreis -->
+            <path
+                android:fillColor="#2E86B8"
+                android:pathData="M16.5,10A6.5,6.5 0 1 1 16.5,23A6.5,6.5 0 0 1 16.5,10z" />
+
+            <!-- Uhrzeiger -->
+            <path
+                android:fillColor="#FFFFFF"
+                android:pathData="M16.5,12.5a0.6,0.6 0 0 1 0.6,0.6v3.2l2,2a0.6,0.6 0 1 1 -0.8,0.8l-2.2,-2.2a0.6,0.6 0 0 1 -0.2,-0.4v-3.4a0.6,0.6 0 0 1 0.6,-0.6z" />
+
+        </vector>
+    </item>
+
+</selector>

@@ -46,11 +46,11 @@ public class CreateRunDialogFragment extends DialogFragment {
             String runName    = etRunName.getText().toString().trim();
 
             if (playerName.isEmpty()) {
-                etPlayerName.setError("Bitte Namen eingeben");
+                etPlayerName.setError("Enter your Nickname");
                 return;
             }
             if (runName.isEmpty()) {
-                etRunName.setError("Bitte Lauf-Namen eingeben");
+                etRunName.setError("Enter the run name");
                 return;
             }
 

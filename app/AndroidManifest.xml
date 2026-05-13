@@ -228,6 +228,9 @@
             android:foregroundServiceType="location|health" />
 
         <activity android:name=".view.CreateAdvancedWorkout"/>
+        <activity
+            android:name=".view.WaitingRoomActivity"
+            android:theme="@style/AppTheme"/>
 
     </application>
 </manifest>

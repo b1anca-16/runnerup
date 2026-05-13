@@ -1,5 +1,6 @@
 package org.runnerup.view;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -47,11 +48,12 @@ public class CommunityFragment extends Fragment {
                     challenge.connect("ws://10.0.2.2:8080", new LiveChallenge.OnTokenReceived() {
                         @Override
                         public void onToken(String token) {
-                            Log.d(TAG, "✅ onToken() empfangen: " + token);
                             new Handler(Looper.getMainLooper()).post(() -> {
-                                Log.d(TAG, "Toast wird angezeigt für Token: " + token);
-                                String msg = "Lauf \"" + runName + "\" erstellt!\nCode: " + token;
-                                Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show();
+                                Intent intent = new Intent(requireContext(), WaitingRoomActivity.class);
+                                intent.putExtra(WaitingRoomActivity.EXTRA_TOKEN, token);
+                                intent.putExtra(WaitingRoomActivity.EXTRA_RUN_NAME, runName);
+                                intent.putExtra(WaitingRoomActivity.EXTRA_PLAYER_NAME, playerName);
+                                startActivity(intent);
                             });
                         }
 
@@ -71,22 +73,16 @@ public class CommunityFragment extends Fragment {
                             );
                         }
                     });
-                    Log.d(TAG, "challenge.connect() aufgerufen");
 
                     challenge.createRoom();
-                    Log.d(TAG, "challenge.createRoom() aufgerufen");
 
                 } catch (Exception e) {
-                    Log.e(TAG, "💥 Exception in onRunCreated: " + e.getMessage(), e);
                 }
             });
 
-            Log.d(TAG, "Zeige Dialog...");
             try {
                 dialog.show(getParentFragmentManager(), "create_run_dialog");
-                Log.d(TAG, "✅ Dialog.show() erfolgreich");
             } catch (Exception e) {
-                Log.e(TAG, "💥 Exception bei dialog.show(): " + e.getMessage(), e);
             }
         });
 

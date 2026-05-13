@@ -368,6 +368,8 @@
   <string name="join_run">Join Run</string>
   <string name="run_name">Run Name</string>
   <string name="your_nickname">Your Nickname</string>
+  <string name="waiting_participants">  Waiting for participants...</string>
+  <string name="participants">Participants:</string>
 
   <!--Name of sports, these deprecate array.sportEntries -->
   <string name="SPORT_RUNNING">Running</string>
