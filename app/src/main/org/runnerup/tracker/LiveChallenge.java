@@ -7,6 +7,7 @@ public class LiveChallenge {
     private WebSocket ws;
     private String roomId;
     private OnTokenReceived tokenCallback;
+    private String pendingAction = null;
 
     public interface OnTokenReceived {
         void onToken(String token);
@@ -25,6 +26,10 @@ public class LiveChallenge {
             @Override
             public void onOpen(WebSocket ws, Response response) {
                 Log.d("LiveChallenge", "Verbunden! ✅");
+                // Ausstehende Aktion jetzt ausführen
+                if ("create".equals(pendingAction)) {
+                    ws.send("{\"action\":\"create\"}");
+                }
             }
 
             @Override
