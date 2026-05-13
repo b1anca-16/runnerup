@@ -20,4 +20,8 @@
   <string name="path_simplification_default_tolerance" translatable="false">3</string>
   <string name="code_placeholder">Code: %s</string>
   <string name="hourglass">Hourglass</string>
+  <string name="run_active_since">Time:</string>
+  <string name="distance">Distance:</string>
+  <string name="pace">Pace:</string>
+  <string name="live_ranking">Live Ranking:</string>
 </resources>
