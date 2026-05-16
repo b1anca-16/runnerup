@@ -14,8 +14,14 @@ import android.app.AlertDialog;
 
 public class CreateRunDialogFragment extends DialogFragment {
 
+    public enum Mode { CREATE, JOIN }
+    private Mode mode = Mode.CREATE;
+
+    public void setMode(Mode mode) {   // NEU
+        this.mode = mode;
+    }
     public interface OnRunCreated {
-        void onConfirm(String playerName, String runName);
+        void onConfirm(String playerName, String value);
     }
 
     private OnRunCreated listener;
@@ -35,6 +41,11 @@ public class CreateRunDialogFragment extends DialogFragment {
         Button btnCancel      = view.findViewById(R.id.btn_cancel);
         Button btnConfirm     = view.findViewById(R.id.btn_confirm);
 
+        if (mode == Mode.JOIN) {
+            etRunName.setHint("Room Code");
+            btnConfirm.setText("Join");
+        }
+
         Dialog dialog = new AlertDialog.Builder(requireContext())
                 .setView(view)
                 .create();
@@ -43,19 +54,19 @@ public class CreateRunDialogFragment extends DialogFragment {
 
         btnConfirm.setOnClickListener(v -> {
             String playerName = etPlayerName.getText().toString().trim();
-            String runName    = etRunName.getText().toString().trim();
+            String value = etRunName.getText().toString().trim();
 
             if (playerName.isEmpty()) {
                 etPlayerName.setError("Enter your Nickname");
                 return;
             }
-            if (runName.isEmpty()) {
-                etRunName.setError("Enter the run name");
+            if (value.isEmpty()) {
+                etRunName.setError(mode == Mode.JOIN ? "Enter the room code" : "Enter the run name");
                 return;
             }
 
             if (listener != null) {
-                listener.onConfirm(playerName, runName);
+                listener.onConfirm(playerName, value);
             }
             dialog.dismiss();
         });

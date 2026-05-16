@@ -96,7 +96,6 @@ public class RunActivity extends AppCompatActivity implements TickListener {
   private Formatter formatter = null;
   private TextView activityHr;
   private TextView lapHr;
-  private LiveChallenge challenge;
   private TextView intervalHr;
   private TextView currentHr;
   private TextView activityHeaderHr;
@@ -200,25 +199,6 @@ public class RunActivity extends AppCompatActivity implements TickListener {
               }
             });
     ViewUtil.Insets(findViewById(R.id.start_view), true);
-
-    challenge = new LiveChallenge();
-    challenge.connect("ws://10.0.2.2:8080", new LiveChallenge.OnTokenReceived() {
-      @Override
-      public void onToken(String token) {
-        // Room wurde erstellt oder beigetreten
-        Log.d("LiveChallenge", "Token: " + token);
-      }
-
-      @Override
-      public void onPartnerJoined() {
-        Log.d("LiveChallenge", "Partner beigetreten!");
-      }
-
-      @Override
-      public void onError(String message) {
-        Log.e("LiveChallenge", "Fehler: " + message);
-      }
-    });
   }
 
   private boolean isLargeScreen() {
@@ -320,12 +300,10 @@ public class RunActivity extends AppCompatActivity implements TickListener {
       workout.onTick();
       updateView();
 
-      if (challenge != null) {
-        double km = workout.getDistance(Scope.ACTIVITY);
-        double pace = workout.getSpeed(Scope.CURRENT);
-        double time = workout.getTime(Scope.ACTIVITY);
-        challenge.sendUpdate(km, pace, time);
-      }
+      double km = workout.getDistance(Scope.ACTIVITY);
+      double pace = workout.getSpeed(Scope.CURRENT);
+      double time = workout.getTime(Scope.ACTIVITY);
+      LiveChallenge.getInstance().sendUpdate(km, pace, time);
 
       if (mTracker != null) {
         Location l2 = mTracker.getLastKnownLocation();

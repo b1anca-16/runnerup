@@ -6,13 +6,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import org.runnerup.R;
 import org.runnerup.tracker.LiveChallenge;
-import android.os.Handler;
-import android.os.Looper;
 
 public class CommunityFragment extends Fragment {
 
@@ -20,78 +17,72 @@ public class CommunityFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.d(TAG, "onCreateView() aufgerufen");
         View view = inflater.inflate(R.layout.fragment_community, container, false);
 
-        Button createButton = view.findViewById(R.id.btn_create_run);
-        Button joinButton = view.findViewById(R.id.btn_join_run);
+        view.findViewById(R.id.btn_create_run).setOnClickListener(v -> showCreateDialog());
+        view.findViewById(R.id.btn_join_run).setOnClickListener(v -> showJoinDialog());
 
-        if (createButton == null) Log.e(TAG, "❌ btn_create_run nicht gefunden!");
-        else Log.d(TAG, "✅ btn_create_run gefunden");
+        return view;
+    }
 
-        if (joinButton == null) Log.e(TAG, "❌ btn_join_run nicht gefunden!");
-        else Log.d(TAG, "✅ btn_join_run gefunden");
-
-        createButton.setOnClickListener(v -> {
-            Log.d(TAG, "🖱️ createButton geklickt");
-
-            CreateRunDialogFragment dialog = new CreateRunDialogFragment();
-            Log.d(TAG, "Dialog-Objekt erstellt");
-
-            dialog.setOnRunCreated((playerName, runName) -> {
-                Log.d(TAG, "✅ onRunCreated() ausgelöst – playerName=" + playerName + ", runName=" + runName);
-
-                try {
-                    LiveChallenge challenge = new LiveChallenge();
-                    Log.d(TAG, "LiveChallenge-Objekt erstellt");
-
-                    challenge.connect("ws://10.0.2.2:8080", new LiveChallenge.OnTokenReceived() {
-                        @Override
-                        public void onToken(String token) {
-                            new Handler(Looper.getMainLooper()).post(() -> {
-                                Intent intent = new Intent(requireContext(), WaitingRoomActivity.class);
-                                intent.putExtra(WaitingRoomActivity.EXTRA_TOKEN, token);
-                                intent.putExtra(WaitingRoomActivity.EXTRA_RUN_NAME, runName);
-                                intent.putExtra(WaitingRoomActivity.EXTRA_PLAYER_NAME, playerName);
-                                startActivity(intent);
-                            });
-                        }
-
-                        @Override
-                        public void onPartnerJoined() {
-                            Log.d(TAG, "✅ onPartnerJoined() ausgelöst");
-                            requireActivity().runOnUiThread(() ->
-                                    Toast.makeText(getContext(), "Partner ist beigetreten! 🏃", Toast.LENGTH_SHORT).show()
-                            );
-                        }
-
-                        @Override
-                        public void onError(String message) {
-                            Log.e(TAG, "❌ onError() ausgelöst: " + message);
-                            requireActivity().runOnUiThread(() ->
-                                    Toast.makeText(getContext(), "Fehler: " + message, Toast.LENGTH_SHORT).show()
-                            );
-                        }
-                    });
-
-                    challenge.createRoom();
-
-                } catch (Exception e) {
+    private void showCreateDialog() {
+        CreateRunDialogFragment dialog = new CreateRunDialogFragment();
+        dialog.setOnRunCreated((playerName, runName) -> {
+            LiveChallenge.getInstance().connectAndCreate(playerName, new LiveChallenge.OnTokenReceived() {
+                @Override
+                public void onToken(String token) {
+                    openWaitingRoom(token, runName, playerName, "HOST");
+                }
+                @Override
+                public void onPartnerJoined() {
+                    showToast("Partner ist beigetreten! 🏃");
+                }
+                @Override
+                public void onError(String message) {
+                    Log.e(TAG, "Fehler: " + message);
+                    showToast("Fehler: " + message);
                 }
             });
-
-            try {
-                dialog.show(getParentFragmentManager(), "create_run_dialog");
-            } catch (Exception e) {
-            }
         });
+        dialog.show(getParentFragmentManager(), "create_run_dialog");
+    }
 
-        joinButton.setOnClickListener(v -> {
-            Log.d(TAG, "🖱️ joinButton geklickt");
-            Toast.makeText(getContext(), "Lauf beitreten...", Toast.LENGTH_SHORT).show();
+    private void showJoinDialog() {
+        CreateRunDialogFragment dialog = new CreateRunDialogFragment();
+        dialog.setMode(CreateRunDialogFragment.Mode.JOIN);
+        dialog.setOnRunCreated((playerName, code) -> {
+            LiveChallenge.getInstance().connectAndJoin(code, playerName, new LiveChallenge.OnTokenReceived() {
+                @Override
+                public void onToken(String token) {
+                    openWaitingRoom(token, null, playerName, "JOIN");
+                }
+                @Override
+                public void onPartnerJoined() {
+                    showToast("Partner ist beigetreten! 🏃");
+                }
+                @Override
+                public void onError(String message) {
+                    showToast("Fehler: " + message);
+                }
+            });
         });
+        dialog.show(getParentFragmentManager(), "join_run_dialog");
+    }
 
-        Log.d(TAG, "onCreateView() abgeschlossen");
-        return view;
+    private void openWaitingRoom(String token, String runName, String playerName, String role) {
+        Intent intent = new Intent(requireContext(), WaitingRoomActivity.class);
+        intent.putExtra(WaitingRoomActivity.EXTRA_TOKEN, token);
+        intent.putExtra(WaitingRoomActivity.EXTRA_RUN_NAME, runName);
+        intent.putExtra(WaitingRoomActivity.EXTRA_PLAYER_NAME, playerName);
+        intent.putExtra("ROLE", role);
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
+
+    private void showToast(String message) {
+        if (getContext() != null) {
+            Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+        }
     }
 }

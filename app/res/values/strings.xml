@@ -20,4 +20,6 @@
   <string name="path_simplification_default_tolerance" translatable="false">3</string>
   <string name="code_placeholder">Code: %s</string>
   <string name="hourglass">Hourglass</string>
+    <string name="waiting_participants">Waiting for participants</string>
+  <string name="wait_host">Wait until the host starts the run</string>
 </resources>
