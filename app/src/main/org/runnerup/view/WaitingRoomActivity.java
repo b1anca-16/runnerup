@@ -1,3 +1,9 @@
+/**
+ * Activity, die nach dem Erstellen oder Beitreten eines Laufs angezeigt wird.
+ * Zeigt den Raumcode und die aktuelle Teilnehmerliste an,
+ * die automatisch via WebSocket aktualisiert wird.
+ */
+
 package org.runnerup.view;
 
 import android.os.Bundle;

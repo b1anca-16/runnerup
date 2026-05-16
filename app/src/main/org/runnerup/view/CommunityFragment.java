@@ -1,3 +1,9 @@
+/**
+ * Fragment (=Baustein innerhalb eines Screens) für den Community-Tab.
+ * Zeigt Buttons zum Erstellen und Beitreten eines Live-Laufs an
+ * und öffnet den entsprechenden Dialog zur Eingabe von Name und Raumcode.
+ */
+
 package org.runnerup.view;
 
 import android.content.Intent;

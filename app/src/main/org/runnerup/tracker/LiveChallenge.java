@@ -1,3 +1,9 @@
+/**
+ * Singleton-Klasse, die die WebSocket-Verbindung zum Relay-Server verwaltet.
+ * Ermöglicht das Erstellen und Beitreten von Live-Lauf-Räumen sowie
+ * das Senden von Echtzeit-Updates (km, pace, time) an alle Teilnehmer.
+ */
+
 package org.runnerup.tracker;
 
 import android.os.Handler;

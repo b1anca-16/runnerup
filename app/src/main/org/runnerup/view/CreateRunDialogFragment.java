@@ -1,3 +1,8 @@
+/**
+ * Dialog zur Eingabe von Nickname und Lauf-Name (CREATE-Modus)
+ * oder Nickname und Raumcode (JOIN-Modus).
+ */
+
 package org.runnerup.view;
 
 import android.app.Dialog;
