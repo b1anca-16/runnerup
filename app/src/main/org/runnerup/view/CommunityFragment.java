@@ -31,46 +31,68 @@ public class CommunityFragment extends Fragment {
         return view;
     }
 
-    private void showCreateDialog() {
-        CreateRunDialogFragment dialog = new CreateRunDialogFragment();
-        dialog.setOnRunCreated((playerName, runName) -> {
-            LiveChallenge.getInstance().connectAndCreate(playerName, new LiveChallenge.OnTokenReceived() {
-                @Override
-                public void onToken(String token) {
-                    openWaitingRoom(token, runName, playerName, "HOST");
-                }
-                @Override
-                public void onPartnerJoined() {
-                    showToast("Partner ist beigetreten! 🏃");
-                }
-                @Override
-                public void onError(String message) {
-                    Log.e(TAG, "Fehler: " + message);
-                    showToast("Fehler: " + message);
-                }
-            });
-        });
-        dialog.show(getParentFragmentManager(), "create_run_dialog");
-    }
+        createButton.setOnClickListener(v -> {
+            Log.d(TAG, "🖱️ createButton geklickt");
 
-    private void showJoinDialog() {
-        CreateRunDialogFragment dialog = new CreateRunDialogFragment();
-        dialog.setMode(CreateRunDialogFragment.Mode.JOIN);
-        dialog.setOnRunCreated((playerName, code) -> {
-            LiveChallenge.getInstance().connectAndJoin(code, playerName, new LiveChallenge.OnTokenReceived() {
-                @Override
-                public void onToken(String token) {
-                    openWaitingRoom(token, null, playerName, "JOIN");
-                }
-                @Override
-                public void onPartnerJoined() {
-                    showToast("Partner ist beigetreten! 🏃");
-                }
-                @Override
-                public void onError(String message) {
-                    showToast("Fehler: " + message);
+            CreateRunDialogFragment dialog = new CreateRunDialogFragment();
+            Log.d(TAG, "Dialog-Objekt erstellt");
+
+            dialog.setOnRunCreated((playerName, runName) -> {
+                Log.d(TAG, "✅ onRunCreated() ausgelöst – playerName=" + playerName + ", runName=" + runName);
+
+                try {
+                    LiveChallenge challenge = new LiveChallenge();
+                    Log.d(TAG, "LiveChallenge-Objekt erstellt");
+
+                    challenge.connect("ws://10.0.2.2:8080", new LiveChallenge.OnTokenReceived() {
+                        @Override
+                        public void onToken(String token) {
+                            Log.d(TAG, "✅ onToken() empfangen: " + token);
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                Log.d(TAG, "Toast wird angezeigt für Token: " + token);
+                                String msg = "Lauf \"" + runName + "\" erstellt!\nCode: " + token;
+                                Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show();
+                            });
+                        }
+
+                        @Override
+                        public void onPartnerJoined() {
+                            Log.d(TAG, "✅ onPartnerJoined() ausgelöst");
+                            requireActivity().runOnUiThread(() ->
+                                    Toast.makeText(getContext(), "Partner ist beigetreten! 🏃", Toast.LENGTH_SHORT).show()
+                            );
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            Log.e(TAG, "❌ onError() ausgelöst: " + message);
+                            requireActivity().runOnUiThread(() ->
+                                    Toast.makeText(getContext(), "Fehler: " + message, Toast.LENGTH_SHORT).show()
+                            );
+                        }
+                    });
+                    Log.d(TAG, "challenge.connect() aufgerufen");
+
+                    challenge.createRoom();
+                    Log.d(TAG, "challenge.createRoom() aufgerufen");
+
+                } catch (Exception e) {
+                    Log.e(TAG, "💥 Exception in onRunCreated: " + e.getMessage(), e);
                 }
             });
+
+            Log.d(TAG, "Zeige Dialog...");
+            try {
+                dialog.show(getParentFragmentManager(), "create_run_dialog");
+                Log.d(TAG, "✅ Dialog.show() erfolgreich");
+            } catch (Exception e) {
+                Log.e(TAG, "💥 Exception bei dialog.show(): " + e.getMessage(), e);
+            }
+        });
+
+        joinButton.setOnClickListener(v -> {
+            Log.d(TAG, "🖱️ joinButton geklickt");
+            Toast.makeText(getContext(), "Lauf beitreten...", Toast.LENGTH_SHORT).show();
         });
         dialog.show(getParentFragmentManager(), "join_run_dialog");
     }
