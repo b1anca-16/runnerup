@@ -6,7 +6,9 @@
 
 package org.runnerup.view;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -62,6 +64,7 @@ public class WaitingRoomActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.tv_token)).setText(getString(R.string.code_placeholder, token));
         ((TextView) findViewById(R.id.tv_distance)).setText(getString(R.string.distance_placeholder, distance));
 
+        adapter = new ArrayAdapter<>(this, R.layout.item_participant, participants);
         ((ListView) findViewById(R.id.lv_participants)).setAdapter(adapter);
 
         // 2. Callback registrieren ← HIER
@@ -72,7 +75,9 @@ public class WaitingRoomActivity extends AppCompatActivity {
         });
 
         ((Button) findViewById(R.id.btn_start_run)).setOnClickListener(v -> {
-            // TODO: Lauf starten
+            Intent intent = new Intent(this, ActiveRunActivity.class);
+            intent.putExtra(ActiveRunActivity.EXTRA_RUN_NAME, runName);
+            startActivity(intent);
             finish();
         });
     }

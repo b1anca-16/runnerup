@@ -232,5 +232,9 @@
             android:name=".view.WaitingRoomActivity"
             android:theme="@style/AppTheme"/>
 
+        <activity
+            android:name=".view.ActiveRunActivity"
+            android:theme="@style/AppTheme"/>
+
     </application>
 </manifest>
