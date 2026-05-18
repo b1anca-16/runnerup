@@ -36,14 +36,22 @@ public class LiveChallenge {
     public interface OnParticipantsChanged {
         void onParticipantsUpdated(List<String> names);
     }
+    public interface OnRunStartedListener {
+        void onRunStarted();
+    }
 
     private OnParticipantsChanged participantCallback;
+    private OnRunStartedListener runStartedListener;
 
     public void setParticipantCallback(OnParticipantsChanged callback) {
         this.participantCallback = callback;
         if (!lastParticipants.isEmpty()) {
             postToMain(() -> callback.onParticipantsUpdated(lastParticipants));
         }
+    }
+
+    public void setRunStartedListener(OnRunStartedListener listener) {
+        this.runStartedListener = listener;
     }
 
     public static LiveChallenge getInstance() {
@@ -108,6 +116,12 @@ public class LiveChallenge {
         } else if (text.contains("\"action\":\"partner_joined\"")) {
             postToMain(() -> { if (tokenCallback != null) tokenCallback.onPartnerJoined(); });
 
+        }else if (text.contains("\"action\":\"started\"")) {
+            postToMain(() -> {
+                if (runStartedListener != null) {
+                    runStartedListener.onRunStarted();
+                }
+            });
         } else if (text.contains("\"action\":\"error\"")) {
             postToMain(() -> { if (tokenCallback != null) tokenCallback.onError("Room nicht gefunden"); });
 
@@ -121,6 +135,11 @@ public class LiveChallenge {
     public void sendUpdate(double km, double pace, double timeSeconds) {
         String json = "{\"room\":\"" + roomId + "\","
                 + "\"data\":{\"km\":" + km + ",\"pace\":" + pace + ",\"time\":" + timeSeconds + "}}";
+        send(json);
+    }
+
+    public void startRun() {
+        String json = "{\"action\":\"start\"}";
         send(json);
     }
 

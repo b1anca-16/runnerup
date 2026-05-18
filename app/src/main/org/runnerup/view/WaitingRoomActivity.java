@@ -17,6 +17,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import org.runnerup.R;
+import org.runnerup.tracker.LiveChallenge;
+
 import java.util.ArrayList;
 
 public class WaitingRoomActivity extends AppCompatActivity {
@@ -74,11 +76,16 @@ public class WaitingRoomActivity extends AppCompatActivity {
             adapter.notifyDataSetChanged();
         });
 
-        ((Button) findViewById(R.id.btn_start_run)).setOnClickListener(v -> {
+        LiveChallenge.getInstance().setRunStartedListener(() -> {
+
             Intent intent = new Intent(this, ActiveRunActivity.class);
             intent.putExtra(ActiveRunActivity.EXTRA_RUN_NAME, runName);
             startActivity(intent);
             finish();
+        });
+
+        ((Button) findViewById(R.id.btn_start_run)).setOnClickListener(v -> {
+            LiveChallenge.getInstance().startRun();
         });
     }
 }
