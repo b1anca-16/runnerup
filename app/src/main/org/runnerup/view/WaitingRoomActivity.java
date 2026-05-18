@@ -62,7 +62,6 @@ public class WaitingRoomActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.tv_token)).setText(getString(R.string.code_placeholder, token));
         ((TextView) findViewById(R.id.tv_distance)).setText(getString(R.string.distance_placeholder, distance));
 
-        adapter = new ArrayAdapter<>(this, R.layout.item_participant, participants);
         ((ListView) findViewById(R.id.lv_participants)).setAdapter(adapter);
 
         // 2. Callback registrieren ← HIER
