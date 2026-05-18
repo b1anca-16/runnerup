@@ -1,63 +1,89 @@
 package org.runnerup.view;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import org.runnerup.R;
+import org.runnerup.util.Formatter;
+import org.runnerup.workout.Scope;
 
 import java.util.ArrayList;
 import java.util.List;
-import androidx.core.view.WindowInsetsCompat;
 
-public class ActiveRunActivity extends AppCompatActivity {
+public class ActiveRunActivity extends BaseRunActivity {
 
-    public static final String EXTRA_RUN_NAME = "run_name"; // ← neu
+    public static final String EXTRA_RUN_NAME = "run_name";
 
     private ListView participantsListView;
     private Button pauseButton;
     private Button stopButton;
 
+    private TextView activityTime;
+    private TextView activityDistance;
+    private TextView activityPace;
+
     private final List<String> participants = new ArrayList<>();
-    private boolean isPaused = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.active_run);
 
-        ViewCompat.setOnApplyWindowInsetsListener(
-                findViewById(android.R.id.content), (v, insets) -> {
-                    int top = insets.getInsets(WindowInsetsCompat.Type.systemBars()).top;
-                    v.setPadding(
-                            v.getPaddingLeft(),
-                            top,
-                            v.getPaddingRight(),
-                            v.getPaddingBottom()
-                    );
-                    return insets;
-                });
+        formatter = new Formatter(this);
 
-        String runName = getIntent().getStringExtra(EXTRA_RUN_NAME);
-        if (getSupportActionBar() != null && runName != null) {
-            getSupportActionBar().setTitle(runName);
-        }
+        applyWindowInsets();
+        setupActionBarTitle();
 
         bindViews();
         setupParticipantsList();
         setupButtons();
+
+        initRunSession();
+    }
+
+    private void applyWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(
+                findViewById(android.R.id.content),
+                (view, insets) -> {
+                    int topInset =
+                            insets.getInsets(WindowInsetsCompat.Type.systemBars()).top;
+
+                    view.setPadding(
+                            view.getPaddingLeft(),
+                            topInset,
+                            view.getPaddingRight(),
+                            view.getPaddingBottom()
+                    );
+
+                    return insets;
+                }
+        );
+    }
+
+    private void setupActionBarTitle() {
+        String runName = getIntent().getStringExtra(EXTRA_RUN_NAME);
+
+        if (getSupportActionBar() != null && runName != null) {
+            getSupportActionBar().setTitle(runName);
+        }
     }
 
     private void bindViews() {
         participantsListView = findViewById(R.id.lv_participants);
+
         pauseButton = findViewById(R.id.pause_button);
         stopButton = findViewById(R.id.stop_button);
+
+        activityTime = findViewById(R.id.run_activity_time);
+        activityDistance = findViewById(R.id.run_activity_distance);
+        activityPace = findViewById(R.id.run_activity_pace);
     }
 
     private void setupParticipantsList() {
@@ -66,51 +92,85 @@ public class ActiveRunActivity extends AppCompatActivity {
                 android.R.layout.simple_list_item_1,
                 participants
         );
+
         participantsListView.setAdapter(adapter);
     }
 
     private void setupButtons() {
-        pauseButton.setOnClickListener(v -> {
-            isPaused = !isPaused;
-            updatePauseButton();
-        });
-
-        updatePauseButton();
+        pauseButton.setOnClickListener(v -> togglePauseState());
+        stopButton.setOnClickListener(v -> stopCurrentRun());
     }
 
-    private void updatePauseButton() {
-        if (isPaused) {
-            setPauseButtonState(
-                    org.runnerup.common.R.string.Resume,
-                    R.drawable.btn_green,
-                    org.runnerup.common.R.drawable.ic_av_play_arrow
+    @Override
+    protected void onRunDataUpdated() {
+        updateRunStats();
+    }
+
+    @Override
+    protected void onPauseStateChanged(boolean paused) {
+        updatePauseButton(!paused);
+    }
+
+    private void updateRunStats() {
+        if (workout == null || formatter == null) {
+            return;
+        }
+
+        double time = workout.getTime(Scope.ACTIVITY);
+        double distance = workout.getDistance(Scope.ACTIVITY);
+        double pace = workout.getSpeed(Scope.ACTIVITY);
+
+        activityTime.setText(
+                formatter.formatElapsedTime(
+                        Formatter.Format.TXT_SHORT,
+                        Math.round(time)
+                )
+        );
+
+        activityDistance.setText(
+                formatter.formatDistance(
+                        Formatter.Format.TXT_SHORT,
+                        Math.round(distance)
+                )
+        );
+
+        activityPace.setText(
+                formatter.formatVelocityByPreferredUnit(
+                        Formatter.Format.TXT_SHORT,
+                        pace
+                )
+        );
+    }
+
+    private void updatePauseButton(boolean running) {
+        if (running) {
+            pauseButton.setText(org.runnerup.common.R.string.Pause);
+
+            ViewCompat.setBackground(
+                    pauseButton,
+                    AppCompatResources.getDrawable(this, R.drawable.btn_blue)
+            );
+
+            pauseButton.setCompoundDrawablesWithIntrinsicBounds(
+                    0,
+                    0,
+                    org.runnerup.common.R.drawable.ic_av_pause,
+                    0
             );
         } else {
-            setPauseButtonState(
-                    org.runnerup.common.R.string.Pause,
-                    R.drawable.btn_blue,
-                    org.runnerup.common.R.drawable.ic_av_pause
+            pauseButton.setText(org.runnerup.common.R.string.Resume);
+
+            ViewCompat.setBackground(
+                    pauseButton,
+                    AppCompatResources.getDrawable(this, R.drawable.btn_green)
+            );
+
+            pauseButton.setCompoundDrawablesWithIntrinsicBounds(
+                    0,
+                    0,
+                    org.runnerup.common.R.drawable.ic_av_play_arrow,
+                    0
             );
         }
-    }
-
-    private void setPauseButtonState(
-            int textResId,
-            int backgroundResId,
-            int iconResId
-    ) {
-        pauseButton.setText(textResId);
-
-        ViewCompat.setBackground(
-                pauseButton,
-                AppCompatResources.getDrawable(this, backgroundResId)
-        );
-
-        pauseButton.setCompoundDrawablesWithIntrinsicBounds(
-                0,
-                0,
-                iconResId,
-                0
-        );
     }
 }

@@ -106,7 +106,6 @@ public class StartFragment extends Fragment implements TickListener, GpsInformat
     ACCEPTABLE,
     GOOD
   }
-
   private static final String TAB_BASIC = "basic";
   private static final String TAB_INTERVAL = "interval";
   static final String TAB_ADVANCED = "advanced";
