@@ -303,7 +303,7 @@ public class RunActivity extends AppCompatActivity implements TickListener {
       double km = workout.getDistance(Scope.ACTIVITY);
       double pace = workout.getSpeed(Scope.CURRENT);
       double time = workout.getTime(Scope.ACTIVITY);
-      LiveChallenge.getInstance().sendUpdate(km, pace, time);
+      LiveChallenge.getInstance().sendUpdate(km);
 
       if (mTracker != null) {
         Location l2 = mTracker.getLastKnownLocation();
