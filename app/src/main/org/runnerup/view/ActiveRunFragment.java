@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,13 +20,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ActiveRunFragment extends Fragment {
-    private ListView lvParticipants;
+
+    private ListView participantsListView;
     private Button pauseButton;
     private Button stopButton;
 
     private final List<String> participants = new ArrayList<>();
+    private boolean isPaused = false;
 
     public ActiveRunFragment() {
+        // Required empty public constructor
     }
 
     @Nullable
@@ -39,55 +41,71 @@ public class ActiveRunFragment extends Fragment {
     ) {
         View view = inflater.inflate(R.layout.active_run, container, false);
 
-        lvParticipants = view.findViewById(R.id.lv_participants);
-        pauseButton = view.findViewById(R.id.pause_button);
-        stopButton = view.findViewById(R.id.stop_button);
-
-        setupParticipants();
+        bindViews(view);
+        setupParticipantsList();
         setupButtons();
 
         return view;
     }
 
-    private void setupParticipants() {
+    private void bindViews(@NonNull View view) {
+        participantsListView = view.findViewById(R.id.lv_participants);
+        pauseButton = view.findViewById(R.id.pause_button);
+        stopButton = view.findViewById(R.id.stop_button);
+    }
 
-        ArrayAdapter<String> participantAdapter = new ArrayAdapter<>(
+    private void setupParticipantsList() {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 requireContext(),
                 android.R.layout.simple_list_item_1,
                 participants
         );
 
-        lvParticipants.setAdapter(participantAdapter);
+        participantsListView.setAdapter(adapter);
     }
 
-    private final View.OnClickListener pauseButtonClick =
-            v -> {
-                if (workout == null) {
-                    // "should not happen"
-                    return;
-                }
+    private void setupButtons() {
+        pauseButton.setOnClickListener(v -> {
+            isPaused = !isPaused;
+            updatePauseButton();
+        });
 
-                if (workout.isPaused()) {
-                    workout.onResume(workout);
-                } else {
-                    workout.onPause(workout);
-                }
-                setPauseButtonEnabled(!workout.isPaused());
-            };
+        updatePauseButton();
+    }
 
-    private void setPauseButtonEnabled(boolean enabled) {
-        if (enabled) {
-            pauseButton.setText(org.runnerup.common.R.string.Pause);
-            ViewCompat.setBackground(
-                    pauseButton, AppCompatResources.getDrawable(this, R.drawable.btn_blue));
-            pauseButton.setCompoundDrawablesWithIntrinsicBounds(
-                    0, 0, org.runnerup.common.R.drawable.ic_av_pause, 0);
+    private void updatePauseButton() {
+        if (isPaused) {
+            setPauseButtonState(
+                    org.runnerup.common.R.string.Resume,
+                    R.drawable.btn_green,
+                    org.runnerup.common.R.drawable.ic_av_play_arrow
+            );
         } else {
-            pauseButton.setText(org.runnerup.common.R.string.Resume);
-            ViewCompat.setBackground(
-                    pauseButton, AppCompatResources.getDrawable(this, R.drawable.btn_green));
-            pauseButton.setCompoundDrawablesWithIntrinsicBounds(
-                    0, 0, org.runnerup.common.R.drawable.ic_av_play_arrow, 0);
+            setPauseButtonState(
+                    org.runnerup.common.R.string.Pause,
+                    R.drawable.btn_blue,
+                    org.runnerup.common.R.drawable.ic_av_pause
+            );
         }
+    }
+
+    private void setPauseButtonState(
+            int textResId,
+            int backgroundResId,
+            int iconResId
+    ) {
+        pauseButton.setText(textResId);
+
+        ViewCompat.setBackground(
+                pauseButton,
+                AppCompatResources.getDrawable(requireContext(), backgroundResId)
+        );
+
+        pauseButton.setCompoundDrawablesWithIntrinsicBounds(
+                0,
+                0,
+                iconResId,
+                0
+        );
     }
 }

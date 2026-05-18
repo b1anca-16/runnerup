@@ -1,37 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/active_run_root"
+    android:id="@+id/waiting_room_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingStart="28dp"
-    android:paddingEnd="28dp"
-    android:paddingTop="72dp"
-    android:paddingBottom="28dp"
+    android:gravity="center_horizontal"
     android:padding="32dp">
-
-    <!-- Run name -->
-    <TextView
-        android:id="@+id/tv_run_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:layout_marginBottom="15dp"
-        android:text="@string/run_name"
-        android:textColor="#FFFFFF"
-        android:textSize="30sp"
-        android:textStyle="bold" />
-
-    <!-- Join code -->
-    <TextView
-        android:layout_width="183dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="20dp"
-        android:text="@string/code_placeholder"
-        android:textColor="#FFF"
-        android:textSize="25sp"
-        android:textStyle="bold" />
 
     <!-- Active since -->
     <TableRow
@@ -124,8 +98,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:paddingTop="8dp"
-        android:divider="1dp"
-        android:dividerHeight="1dp"/>
+        android:dividerHeight="5dp"/>
 
     <TableRow
         android:id="@+id/run_table_row1"
