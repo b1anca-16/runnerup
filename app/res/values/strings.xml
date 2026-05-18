@@ -28,4 +28,5 @@
   <string name="wait_host">Wait until the host starts the run</string>
     <string name="run_distance">Distance</string>
   <string name="distance_placeholder">Distance: %.1f km</string>
+  <string name="community_run_subtitle">Create or join a Community Run</string>
 </resources>
