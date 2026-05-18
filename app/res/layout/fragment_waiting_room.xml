@@ -14,8 +14,16 @@
         android:textSize="28sp"
         android:textStyle="bold"
         android:textColor="#FFF"
-        android:layout_marginBottom="32dp"
         android:paddingTop="40dp"/>
+
+    <TextView
+        android:id="@+id/tv_distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="#FFF"
+        android:layout_marginTop="8dp"/>
 
     <ImageView
         android:layout_width="120dp"

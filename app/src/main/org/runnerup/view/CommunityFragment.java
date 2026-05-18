@@ -33,22 +33,27 @@ public class CommunityFragment extends Fragment {
 
     private void showCreateDialog() {
         CreateRunDialogFragment dialog = new CreateRunDialogFragment();
-        dialog.setOnRunCreated((playerName, runName) -> {
-            LiveChallenge.getInstance().connectAndCreate(playerName, new LiveChallenge.OnTokenReceived() {
-                @Override
-                public void onToken(String token) {
-                    openWaitingRoom(token, runName, playerName, "HOST");
-                }
-                @Override
-                public void onPartnerJoined() {
-                    showToast("Partner ist beigetreten! 🏃");
-                }
-                @Override
-                public void onError(String message) {
-                    Log.e(TAG, "Fehler: " + message);
-                    showToast("Fehler: " + message);
-                }
-            });
+        dialog.setOnRunCreated(new CreateRunDialogFragment.OnRunCreated() {
+            @Override
+            public void onCreate(String playerName, String runName, float distance) {
+                LiveChallenge.getInstance().connectAndCreate(playerName, distance,new LiveChallenge.OnTokenReceived() {
+                    @Override
+                    public void onToken(String token) {
+                        openWaitingRoom(token, runName, playerName, "HOST", distance);
+                    }
+                    @Override
+                    public void onPartnerJoined() {
+                        showToast("Partner ist beigetreten! 🏃");
+                    }
+                    @Override
+                    public void onError(String message) {
+                        Log.e(TAG, "Fehler: " + message);
+                        showToast("Fehler: " + message);
+                    }
+                });
+            }
+            @Override
+            public void onJoin(String playerName, String code) {} // nicht genutzt
         });
         dialog.show(getParentFragmentManager(), "create_run_dialog");
     }
@@ -56,31 +61,37 @@ public class CommunityFragment extends Fragment {
     private void showJoinDialog() {
         CreateRunDialogFragment dialog = new CreateRunDialogFragment();
         dialog.setMode(CreateRunDialogFragment.Mode.JOIN);
-        dialog.setOnRunCreated((playerName, code) -> {
-            LiveChallenge.getInstance().connectAndJoin(code, playerName, new LiveChallenge.OnTokenReceived() {
-                @Override
-                public void onToken(String token) {
-                    openWaitingRoom(token, null, playerName, "JOIN");
-                }
-                @Override
-                public void onPartnerJoined() {
-                    showToast("Partner ist beigetreten! 🏃");
-                }
-                @Override
-                public void onError(String message) {
-                    showToast("Fehler: " + message);
-                }
-            });
+        dialog.setOnRunCreated(new CreateRunDialogFragment.OnRunCreated() {
+            @Override
+            public void onCreate(String playerName, String runName, float distance) {} // nicht genutzt
+            @Override
+            public void onJoin(String playerName, String code) {
+                LiveChallenge.getInstance().connectAndJoin(code, playerName, new LiveChallenge.OnTokenReceived() {
+                    @Override
+                    public void onToken(String token) {
+                        openWaitingRoom(token, null, playerName, "JOIN", 0f);
+                    }
+                    @Override
+                    public void onPartnerJoined() {
+                        showToast("Partner ist beigetreten! 🏃");
+                    }
+                    @Override
+                    public void onError(String message) {
+                        showToast("Fehler: " + message);
+                    }
+                });
+            }
         });
         dialog.show(getParentFragmentManager(), "join_run_dialog");
     }
 
-    private void openWaitingRoom(String token, String runName, String playerName, String role) {
+    private void openWaitingRoom(String token, String runName, String playerName, String role, float distance) {
         Intent intent = new Intent(requireContext(), WaitingRoomActivity.class);
         intent.putExtra(WaitingRoomActivity.EXTRA_TOKEN, token);
         intent.putExtra(WaitingRoomActivity.EXTRA_RUN_NAME, runName);
         intent.putExtra(WaitingRoomActivity.EXTRA_PLAYER_NAME, playerName);
         intent.putExtra("ROLE", role);
+        intent.putExtra(WaitingRoomActivity.EXTRA_DISTANCE, distance);
 
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

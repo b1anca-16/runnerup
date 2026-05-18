@@ -53,9 +53,9 @@ public class LiveChallenge {
         return instance;
     }
 
-    public void connectAndCreate(String playerName, OnTokenReceived callback) {
+    public void connectAndCreate(String playerName, float distance, OnTokenReceived callback) {
         this.tokenCallback = callback;
-        connectInternal(() -> send("{\"action\":\"create\",\"name\":\"" + playerName + "\"}"));
+        connectInternal(() -> send("{\"action\":\"create\",\"name\":\"" + playerName + "\",\"distance\":" + distance + "}"));
     }
 
     public void connectAndJoin(String roomCode, String playerName, OnTokenReceived callback) {

@@ -22,6 +22,7 @@ public class WaitingRoomActivity extends AppCompatActivity {
     public static final String EXTRA_TOKEN       = "token";
     public static final String EXTRA_RUN_NAME    = "run_name";
     public static final String EXTRA_PLAYER_NAME = "player_name";
+    public static final String EXTRA_DISTANCE = "DISTANCE";
 
     private ArrayList<String> participants = new ArrayList<>();
     private ArrayAdapter<String> adapter;
@@ -52,12 +53,14 @@ public class WaitingRoomActivity extends AppCompatActivity {
 
         String token      = getIntent().getStringExtra(EXTRA_TOKEN);
         String runName    = getIntent().getStringExtra(EXTRA_RUN_NAME);
+        float distance = getIntent().getFloatExtra(EXTRA_DISTANCE, 5f);
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(runName);
         }
 
         ((TextView) findViewById(R.id.tv_token)).setText(getString(R.string.code_placeholder, token));
+        ((TextView) findViewById(R.id.tv_distance)).setText(getString(R.string.distance_placeholder, distance));
 
         adapter = new ArrayAdapter<>(this, R.layout.item_participant, participants);
         ((ListView) findViewById(R.id.lv_participants)).setAdapter(adapter);
