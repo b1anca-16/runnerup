@@ -102,6 +102,7 @@
     <style name="BlueButton">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">56dp</item>
+        <item name="cornerRadius">12dp</item>
 
         <item name="android:layout_marginBottom">12dp</item>
 
