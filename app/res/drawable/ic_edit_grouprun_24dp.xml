@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Kopf -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M12,12a4,4 0 1,0 0,-8a4,4 0 1,0 0,8z" />
+
+    <!-- Körper -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M12,14c-4.4,0 -8,2.2 -8,5v1h16v-1c0,-2.8 -3.6,-5 -8,-5z" />
+
+    <!-- Plus-Symbol horizontal -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M18,8h4v2h-4z" />
+
+    <!-- Plus-Symbol vertikal -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M19,7h2v4h-2z" />
+
+</vector>
