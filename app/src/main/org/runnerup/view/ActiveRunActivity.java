@@ -126,15 +126,8 @@ public class ActiveRunActivity extends AppCompatActivity {
 
         LiveChallenge.getInstance().setLeaderboardListener(json -> {
             runOnUiThread(() -> {
-
-                Log.d("DEBUG", "Participants JSON: " + json);
-                List<Participant> list = parseLeaderboard(json);
-                Log.d("DEBUG", "Parsed participants: " + list.size());
-
-                participants.clear();
-                participants.addAll(list);
-
-                adapter.notifyDataSetChanged();
+                List<Participant> newList = parseLeaderboard(json);
+                updateParticipantsDiff(newList);
             });
         });
 
@@ -204,5 +197,33 @@ public class ActiveRunActivity extends AppCompatActivity {
             Log.e("ActiveRun", "parseLeaderboard failed: " + e.getMessage());
         }
         return result;
+    }
+
+    private void updateParticipantsDiff(List<Participant> newList) {
+        for (int i = 0; i < newList.size(); i++) {
+            Participant incoming = newList.get(i);
+
+            if (i < participants.size()) {
+                Participant existing = participants.get(i);
+
+                if (!existing.name.equals(incoming.name)) {
+                    participants.set(i, incoming);
+                    adapter.notifyItemChanged(i);
+                } else if (existing.km != incoming.km) {
+                    existing.km = incoming.km;
+                    adapter.notifyItemChanged(i, "km_update");
+                }
+            } else {
+                participants.add(incoming);
+                adapter.notifyItemInserted(i);
+            }
+        }
+
+        // Überschüssige Einträge am Ende entfernen
+        while (participants.size() > newList.size()) {
+            int last = participants.size() - 1;
+            participants.remove(last);
+            adapter.notifyItemRemoved(last);
+        }
     }
 }

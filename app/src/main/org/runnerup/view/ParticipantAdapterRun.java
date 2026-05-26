@@ -12,6 +12,7 @@ import org.runnerup.R;
 import org.runnerup.view.ActiveRunActivity;
 
 import java.util.List;
+import java.util.Locale;
 
 public class ParticipantAdapterRun extends RecyclerView.Adapter<ParticipantAdapterRun.ViewHolder> {
 
@@ -41,11 +42,22 @@ public class ParticipantAdapterRun extends RecyclerView.Adapter<ParticipantAdapt
     }
 
     @Override
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position,
+                                 @NonNull List<Object> payloads) {
+        if (!payloads.isEmpty() && "km_update".equals(payloads.get(0))) {
+            holder.km.setText(
+                    String.format(Locale.getDefault(), "%.2f km", data.get(position).km)
+            );
+        } else {
+            onBindViewHolder(holder, position);
+        }
+    }
+
+    @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ActiveRunActivity.Participant p = data.get(position);
-
         holder.name.setText(p.name);
-        holder.km.setText(String.valueOf(p.km));
+        holder.km.setText(String.format(Locale.getDefault(), "%.2f km", p.km));
     }
 
     @Override
