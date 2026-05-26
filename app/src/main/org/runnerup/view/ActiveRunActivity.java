@@ -22,12 +22,18 @@ import android.os.Looper;
 public class ActiveRunActivity extends AppCompatActivity {
 
     public static final String EXTRA_RUN_NAME = "run_name";
+
     public class Participant {
         public String name;
         public double km;
-        public Participant(String name, double km) {
+        public boolean finished;
+        public int place;
+
+        public Participant(String name, double km, boolean finished, int place) {
             this.name = name;
             this.km = km;
+            this.finished = finished;
+            this.place = place;
         }
     }
 
@@ -88,9 +94,7 @@ public class ActiveRunActivity extends AppCompatActivity {
     }
 
     private void setupParticipantsList() {
-
         adapter = new ParticipantAdapterRun(participants);
-
         participantsRecyclerView.setAdapter(adapter);
         participantsRecyclerView.setLayoutManager(
                 new androidx.recyclerview.widget.LinearLayoutManager(this)
@@ -102,7 +106,6 @@ public class ActiveRunActivity extends AppCompatActivity {
             isPaused = !isPaused;
             updatePauseButton();
         });
-
         updatePauseButton();
     }
 
@@ -123,7 +126,6 @@ public class ActiveRunActivity extends AppCompatActivity {
     }
 
     private void setupLiveCallbacks() {
-
         LiveChallenge.getInstance().setLeaderboardListener(json -> {
             runOnUiThread(() -> {
                 List<Participant> newList = parseLeaderboard(json);
@@ -132,11 +134,11 @@ public class ActiveRunActivity extends AppCompatActivity {
         });
 
         LiveChallenge.getInstance().setRunStartedListener(() -> {
-            runOnUiThread(() -> {
-                Log.d("ActiveRun", "Run started");
-            });
+            runOnUiThread(() -> Log.d("ActiveRun", "Run started"));
         });
     }
+
+    private double fakeCurrentKm = 0.0;
 
     private void startProgressSending() {
         sendingProgress = true;
@@ -144,40 +146,25 @@ public class ActiveRunActivity extends AppCompatActivity {
         progressRunnable = new Runnable() {
             @Override
             public void run() {
-
                 if (!sendingProgress) return;
 
-                double fakeKm = Math.random() * 5; // TEST-WERT
+                double delta = 0.5 + Math.random() * 0.5;
+                fakeCurrentKm += delta;
 
-                LiveChallenge.getInstance().sendUpdate(fakeKm);
+                LiveChallenge.getInstance().sendUpdate(fakeCurrentKm);
+                Log.d("ActiveRun", "📡 Progress sent: " + fakeCurrentKm + " km");
 
-                Log.d("ActiveRun", "📡 Progress sent: " + fakeKm + " km");
-
-                progressHandler.postDelayed(this, 20_000); // 20 Sekunden
+                progressHandler.postDelayed(this, 10_000);
             }
         };
 
         progressHandler.post(progressRunnable);
     }
 
-    private void setPauseButtonState(
-            int textResId,
-            int backgroundResId,
-            int iconResId
-    ) {
+    private void setPauseButtonState(int textResId, int backgroundResId, int iconResId) {
         pauseButton.setText(textResId);
-
-        ViewCompat.setBackground(
-                pauseButton,
-                AppCompatResources.getDrawable(this, backgroundResId)
-        );
-
-        pauseButton.setCompoundDrawablesWithIntrinsicBounds(
-                0,
-                0,
-                iconResId,
-                0
-        );
+        ViewCompat.setBackground(pauseButton, AppCompatResources.getDrawable(this, backgroundResId));
+        pauseButton.setCompoundDrawablesWithIntrinsicBounds(0, 0, iconResId, 0);
     }
 
     private List<Participant> parseLeaderboard(String json) {
@@ -189,9 +176,11 @@ public class ActiveRunActivity extends AppCompatActivity {
 
             for (int i = 0; i < array.length(); i++) {
                 org.json.JSONObject obj = array.getJSONObject(i);
-                String name = obj.getString("name");
-                double km   = obj.getDouble("km");
-                result.add(new Participant(name, km));
+                String name      = obj.getString("name");
+                double km        = obj.getDouble("km");
+                boolean finished = obj.optBoolean("finished", false);
+                int place        = obj.optInt("place", 0);
+                result.add(new Participant(name, km, finished, place));
             }
         } catch (org.json.JSONException e) {
             Log.e("ActiveRun", "parseLeaderboard failed: " + e.getMessage());
@@ -200,26 +189,47 @@ public class ActiveRunActivity extends AppCompatActivity {
     }
 
     private void updateParticipantsDiff(List<Participant> newList) {
+        // Serverreihenfolge übernehmen: per Name suchen, nicht per Position
         for (int i = 0; i < newList.size(); i++) {
             Participant incoming = newList.get(i);
 
-            if (i < participants.size()) {
-                Participant existing = participants.get(i);
+            int existingIndex = -1;
+            for (int j = 0; j < participants.size(); j++) {
+                if (participants.get(j).name.equals(incoming.name)) {
+                    existingIndex = j;
+                    break;
+                }
+            }
 
-                if (!existing.name.equals(incoming.name)) {
-                    participants.set(i, incoming);
-                    adapter.notifyItemChanged(i);
-                } else if (existing.km != incoming.km) {
-                    existing.km = incoming.km;
+            if (existingIndex == -1) {
+                // Neuer Teilnehmer
+                participants.add(i, incoming);
+                adapter.notifyItemInserted(i);
+            } else {
+                Participant existing = participants.get(existingIndex);
+
+                // Position hat sich geändert → Item verschieben
+                if (existingIndex != i) {
+                    participants.remove(existingIndex);
+                    participants.add(i, existing);
+                    adapter.notifyItemMoved(existingIndex, i);
+                }
+
+                // Werte aktualisieren (auch wenn finished)
+                boolean changed = existing.finished != incoming.finished
+                        || existing.km != incoming.km
+                        || existing.place != incoming.place;
+
+                if (changed) {
+                    existing.km       = incoming.km;
+                    existing.finished = incoming.finished;
+                    existing.place    = incoming.place;
                     adapter.notifyItemChanged(i, "km_update");
                 }
-            } else {
-                participants.add(incoming);
-                adapter.notifyItemInserted(i);
             }
         }
 
-        // Überschüssige Einträge am Ende entfernen
+        // Überschüssige Einträge entfernen
         while (participants.size() > newList.size()) {
             int last = participants.size() - 1;
             participants.remove(last);

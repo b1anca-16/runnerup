@@ -44,7 +44,8 @@ public class ParticipantAdapterRun extends RecyclerView.Adapter<ParticipantAdapt
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position,
                                  @NonNull List<Object> payloads) {
-        if (!payloads.isEmpty() && "km_update".equals(payloads.get(0))) {
+        if (!payloads.isEmpty() && "km_update".equals(payloads.get(0))
+                && !data.get(position).finished) {
             holder.km.setText(
                     String.format(Locale.getDefault(), "%.2f km", data.get(position).km)
             );
@@ -57,7 +58,15 @@ public class ParticipantAdapterRun extends RecyclerView.Adapter<ParticipantAdapt
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ActiveRunActivity.Participant p = data.get(position);
         holder.name.setText(p.name);
-        holder.km.setText(String.format(Locale.getDefault(), "%.2f km", p.km));
+        if (p.finished) {
+            holder.km.setText("Finished");
+            holder.itemView.setBackgroundColor(
+                    holder.itemView.getContext().getColor(android.R.color.holo_green_light)
+            );
+        } else {
+            holder.km.setText(String.format(Locale.getDefault(), "%.2f km", p.km));
+            holder.itemView.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+        }
     }
 
     @Override
