@@ -52,6 +52,7 @@ public class LiveRunActivity extends BaseRunActivity {
     private TextView activityTime;
     private TextView activityDistance;
     private TextView activityPace;
+    private String ownName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +73,7 @@ public class LiveRunActivity extends BaseRunActivity {
                 });
 
         String runName = getIntent().getStringExtra(EXTRA_RUN_NAME);
+        ownName = getIntent().getStringExtra("PLAYER_NAME");
         if (getSupportActionBar() != null && runName != null) {
             getSupportActionBar().setTitle(runName);
         }
@@ -98,6 +100,14 @@ public class LiveRunActivity extends BaseRunActivity {
         Log.d("LiveRun", "onRunDataUpdated called");
         updateRunStats();
     }
+
+    //das nach dem Testen zum Senden der echten Daten rein kommentieren!!
+    //@Override
+    //protected void onRunTick() {
+    //    if (workout == null) return;
+    //    double realDistance = workout.getDistance(Scope.ACTIVITY);
+    //    LiveChallenge.getInstance().sendUpdate(realDistance);
+    //}
 
     @Override
     protected void onPauseStateChanged(boolean paused) {
@@ -184,7 +194,6 @@ public class LiveRunActivity extends BaseRunActivity {
                 if (fakeCurrentKm >= targetKm) {
                     fakeCurrentKm = targetKm; // exakt auf Ziel setzen
                     LiveChallenge.getInstance().sendUpdate(fakeCurrentKm);
-                    Log.d("ActiveRun", "🏁 Finished at " + fakeCurrentKm + " km – stopping updates");
                     sendingProgress = false; // kein weiterer postDelayed
                     return;
                 }
@@ -263,6 +272,13 @@ public class LiveRunActivity extends BaseRunActivity {
                     existing.finished = incoming.finished;
                     existing.place    = incoming.place;
                     adapter.notifyItemChanged(i, "km_update");
+                    if (existing.finished
+                            && ownName != null
+                            && existing.name.equals(ownName)
+                            && workout != null
+                            && !workout.isPaused()) {
+                        togglePauseState();
+                    }
                 }
             }
         }

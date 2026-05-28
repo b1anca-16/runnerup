@@ -58,7 +58,7 @@ public class ParticipantAdapterRun extends RecyclerView.Adapter<ParticipantAdapt
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         LiveRunActivity.Participant p = data.get(position);
-        holder.name.setText(p.name);
+        holder.name.setText(p.place + ". " + p.name);
         if (p.finished) {
             holder.km.setText("Finished");
             holder.itemView.setBackgroundColor(

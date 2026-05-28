@@ -49,6 +49,7 @@ public class WaitingRoomActivity extends AppCompatActivity {
     private org.runnerup.tracker.GpsStatus mGpsStatus = null;
     private boolean runStartRequested = false;
     private String runName;
+    private String playerName;
 
 
     private final ServiceConnection mConnection = new ServiceConnection() {
@@ -106,6 +107,7 @@ public class WaitingRoomActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, LiveRunActivity.class);
         intent.putExtra(LiveRunActivity.EXTRA_RUN_NAME, runName);
+        intent.putExtra("PLAYER_NAME", playerName);
         startActivity(intent);
         finish();
     }
@@ -116,6 +118,7 @@ public class WaitingRoomActivity extends AppCompatActivity {
         setContentView(R.layout.fragment_waiting_room);
         String role = getIntent().getStringExtra(EXTRA_ROLE);
         runName = getIntent().getStringExtra(EXTRA_RUN_NAME);
+        playerName = getIntent().getStringExtra(EXTRA_PLAYER_NAME);
 
         mIsBound = getApplicationContext().bindService(
                 new Intent(this, Tracker.class),
