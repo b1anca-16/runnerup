@@ -33,13 +33,13 @@ public abstract class BaseRunActivity extends AppCompatActivity implements TickL
 
     private final Handler handler = new Handler(Looper.getMainLooper());
 
-    private Timer timer = null;
+    protected Timer timer = null;
     private boolean mIsBound = false;
 
     // FIX #1: startActivityForResult ist deprecated – ActivityResultLauncher verwenden
     private boolean mTickRunning = false; // FIX #2: Schutz gegen gestapelte Tick-Aufrufe
 
-    private final ActivityResultLauncher<Intent> detailActivityLauncher =
+    protected final ActivityResultLauncher<Intent> detailActivityLauncher =
             registerForActivityResult(
                     new ActivityResultContracts.StartActivityForResult(),
                     this::handleDetailActivityResult
@@ -130,7 +130,7 @@ public abstract class BaseRunActivity extends AppCompatActivity implements TickL
         onRunDataUpdated();
     }
 
-    protected final void stopCurrentRun() {
+    protected void stopCurrentRun() {
         if (timer == null || workout == null || mTracker == null) {
             return;
         }
@@ -208,7 +208,7 @@ public abstract class BaseRunActivity extends AppCompatActivity implements TickL
         );
     }
 
-    private void stopTimer() {
+    protected void stopTimer() {
         if (timer != null) {
             timer.cancel();
             timer.purge();

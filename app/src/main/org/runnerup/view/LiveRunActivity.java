@@ -1,5 +1,6 @@
 package org.runnerup.view;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -39,12 +40,10 @@ public class LiveRunActivity extends BaseRunActivity {
         }
     }
 
-    private Button pauseButton;
     private Button stopButton;
     private Handler progressHandler = new Handler(Looper.getMainLooper());
     private Runnable progressRunnable;
     private boolean sendingProgress = false;
-    private boolean isPaused = false;
     private RecyclerView participantsRecyclerView;
     private ParticipantAdapterRun adapter;
     private final List<Participant> participants = new ArrayList<>();
@@ -92,7 +91,6 @@ public class LiveRunActivity extends BaseRunActivity {
     protected void onWorkoutReady() {
         Log.d("LiveRun", "✅ onWorkoutReady fired, workout=" + workout);
         updateRunStats();
-        updatePauseButton(!workout.isPaused());
     }
 
     @Override
@@ -111,7 +109,26 @@ public class LiveRunActivity extends BaseRunActivity {
 
     @Override
     protected void onPauseStateChanged(boolean paused) {
-        updatePauseButton(!paused);
+    }
+
+    @Override
+    protected void stopCurrentRun() {
+        // Callbacks sofort entfernen um weitere Events zu blockieren
+        LiveChallenge.getInstance().setLeaderboardListener(null);
+        LiveChallenge.getInstance().setRunStartedListener(null);
+        LiveChallenge.getInstance().setParticipantCallback(null);
+
+        if (timer == null || workout == null || mTracker == null) return;
+
+        workout.onStop(workout);
+        stopTimer();
+        mTracker.stopForeground(true);
+
+        Intent intent = new Intent(this, DetailActivity.class);
+        intent.putExtra("mode", "save");
+        intent.putExtra("ID", mTracker.getActivityId());
+        intent.putExtra("no_resume", true);
+        detailActivityLauncher.launch(intent);
     }
 
     @Override
@@ -127,7 +144,6 @@ public class LiveRunActivity extends BaseRunActivity {
 
     private void bindViews() {
         participantsRecyclerView = findViewById(R.id.rv_participants);
-        pauseButton  = findViewById(R.id.pause_button);
         stopButton   = findViewById(R.id.stop_button);
         activityTime     = findViewById(R.id.run_activity_time);
         activityDistance = findViewById(R.id.intervall_distance);
@@ -143,25 +159,9 @@ public class LiveRunActivity extends BaseRunActivity {
     }
 
     private void setupButtons() {
-        pauseButton.setOnClickListener(v -> togglePauseState());
-        stopButton.setOnClickListener(v -> stopCurrentRun());
-    }
-
-    // updatePauseButton: Parameter ändern (running statt isPaused-Toggle)
-    private void updatePauseButton(boolean running) {
-        if (running) {
-            setPauseButtonState(
-                    org.runnerup.common.R.string.Pause,
-                    R.drawable.btn_blue,
-                    org.runnerup.common.R.drawable.ic_av_pause
-            );
-        } else {
-            setPauseButtonState(
-                    org.runnerup.common.R.string.Resume,
-                    R.drawable.btn_green,
-                    org.runnerup.common.R.drawable.ic_av_play_arrow
-            );
-        }
+        stopButton.setOnClickListener(v -> {
+            stopCurrentRun();
+        });
     }
 
     private void setupLiveCallbacks() {
@@ -206,12 +206,6 @@ public class LiveRunActivity extends BaseRunActivity {
         };
 
         progressHandler.post(progressRunnable);
-    }
-
-    private void setPauseButtonState(int textResId, int backgroundResId, int iconResId) {
-        pauseButton.setText(textResId);
-        ViewCompat.setBackground(pauseButton, AppCompatResources.getDrawable(this, backgroundResId));
-        pauseButton.setCompoundDrawablesWithIntrinsicBounds(0, 0, iconResId, 0);
     }
 
     private List<Participant> parseLeaderboard(String json) {

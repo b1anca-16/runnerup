@@ -102,28 +102,15 @@
     <TableRow
         android:id="@+id/run_table_row1"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/run_table_row2" >
-
-        <Button
-            android:id="@+id/pause_button"
-            style="@style/ButtonText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/btn_green"
-            android:text="@string/Pause"
-            android:drawableEnd="@drawable/ic_av_pause"
-            android:drawablePadding="-32dp" />
+        android:layout_height="wrap_content">
 
         <Button
             android:id="@+id/stop_button"
             style="@style/ButtonText"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:background="@drawable/btn_red"
-            android:text="@string/Stop"
+            android:text="@string/Cancel"
             android:drawableEnd="@drawable/ic_av_stop"
             android:drawablePadding="-32dp" />
 

@@ -129,6 +129,7 @@ public class DetailActivity extends AppCompatActivity implements Constants {
   private long mStartTime = 0; // activity start time in unix timestamp
   private ContentValues headerData = new ContentValues();
   private static final int EDIT_ACCOUNT_REQUEST = 2;
+  private boolean noResume = false;
 
   /** Called when the activity is first created. */
   @Override
@@ -155,6 +156,8 @@ public class DetailActivity extends AppCompatActivity implements Constants {
     mDB = DBHelper.getReadableDatabase(this);
     syncManager = new SyncManager(this);
     formatter = new Formatter(this);
+
+    noResume = intent.getBooleanExtra("no_resume", false);
 
     if (intentMode.contentEquals("save")) {
       this.mode = MODE_SAVE;
@@ -280,11 +283,11 @@ public class DetailActivity extends AppCompatActivity implements Constants {
             new OnBackPressedCallback(true) {
               @Override
               public void handleOnBackPressed() {
-                if (uploading) {
-                  // Ignore while uploading
-                  return;
-                }
+                if (uploading) return;
                 if (mode == MODE_SAVE) {
+                  if (noResume) {
+                    return;
+                  }
                   resumeButtonClick.onClick(resumeButton);
                 } else {
                   finish();
@@ -321,7 +324,11 @@ public class DetailActivity extends AppCompatActivity implements Constants {
                      formatter, mDB, mID, use_distance_as_x);
 
     if (this.mode == MODE_SAVE) {
-      resumeButton.setOnClickListener(resumeButtonClick);
+      if (noResume) {
+        resumeButton.setVisibility(View.GONE);
+      } else {
+        resumeButton.setOnClickListener(resumeButtonClick);
+      }
       discardButton.setOnClickListener(discardButtonClick);
       setEdit(true);
     } else if (this.mode == MODE_DETAILS) {

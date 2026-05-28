@@ -55,7 +55,7 @@ public class LiveChallenge {
 
     public void setParticipantCallback(OnParticipantsChanged callback) {
         this.participantCallback = callback;
-        if (!lastParticipants.isEmpty()) {
+        if (callback != null && !lastParticipants.isEmpty()) {
             postToMain(() -> callback.onParticipantsUpdated(lastParticipants));
         }
     }
