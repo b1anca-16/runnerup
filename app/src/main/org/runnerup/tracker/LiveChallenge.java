@@ -149,8 +149,15 @@ public class LiveChallenge {
                 }
             });
         } else if (text.contains("\"action\":\"error\"")) {
-            postToMain(() -> { if (tokenCallback != null) tokenCallback.onError("Room nicht gefunden"); });
-
+            // Echte Fehlermeldung vom Server extrahieren
+            String message = "Unbekannter Fehler";
+            try {
+                message = text.split("\"message\":\"")[1].split("\"")[0];
+            } catch (Exception e) {
+                Log.e(TAG, "Fehler beim Parsen der Error-Message");
+            }
+            final String finalMessage = message;
+            postToMain(() -> { if (tokenCallback != null) tokenCallback.onError(finalMessage); });
         } else if (text.contains("\"action\":\"participants\"")) {
             List<String> names = extractParticipants(text);
             lastParticipants = names;
