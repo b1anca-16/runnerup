@@ -233,7 +233,7 @@
             android:theme="@style/AppTheme"/>
 
         <activity
-            android:name=".view.ActiveRunActivity"
+            android:name=".view.LiveRunActivity"
             android:theme="@style/AppTheme"/>
 
     </application>

@@ -4,12 +4,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.view.ViewCompat;
 
 import org.runnerup.R;
 import org.runnerup.tracker.LiveChallenge;
+import org.runnerup.util.Formatter;
+import org.runnerup.workout.Scope;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +19,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.widget.TextView;
 
-public class ActiveRunActivity extends AppCompatActivity {
+public class LiveRunActivity extends BaseRunActivity {
 
     public static final String EXTRA_RUN_NAME = "run_name";
 
@@ -46,11 +48,16 @@ public class ActiveRunActivity extends AppCompatActivity {
     private RecyclerView participantsRecyclerView;
     private ParticipantAdapterRun adapter;
     private final List<Participant> participants = new ArrayList<>();
+    private double targetKm = 5.0;
+    private TextView activityTime;
+    private TextView activityDistance;
+    private TextView activityPace;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.active_run);
+        setContentView(R.layout.live_run);
+        formatter = new Formatter(this);
 
         ViewCompat.setOnApplyWindowInsetsListener(
                 findViewById(android.R.id.content), (v, insets) -> {
@@ -73,7 +80,28 @@ public class ActiveRunActivity extends AppCompatActivity {
         setupParticipantsList();
         setupButtons();
         setupLiveCallbacks();
+        initRunSession();
+        Log.d("LiveRun", "tracker=" + mTracker);
+        Log.d("LiveRun", "workout=" + workout);
         startProgressSending();
+    }
+
+    @Override
+    protected void onWorkoutReady() {
+        Log.d("LiveRun", "✅ onWorkoutReady fired, workout=" + workout);
+        updateRunStats();
+        updatePauseButton(!workout.isPaused());
+    }
+
+    @Override
+    protected void onRunDataUpdated() {
+        Log.d("LiveRun", "onRunDataUpdated called");
+        updateRunStats();
+    }
+
+    @Override
+    protected void onPauseStateChanged(boolean paused) {
+        updatePauseButton(!paused);
     }
 
     @Override
@@ -89,8 +117,11 @@ public class ActiveRunActivity extends AppCompatActivity {
 
     private void bindViews() {
         participantsRecyclerView = findViewById(R.id.rv_participants);
-        pauseButton = findViewById(R.id.pause_button);
-        stopButton = findViewById(R.id.stop_button);
+        pauseButton  = findViewById(R.id.pause_button);
+        stopButton   = findViewById(R.id.stop_button);
+        activityTime     = findViewById(R.id.run_activity_time);
+        activityDistance = findViewById(R.id.intervall_distance);
+        activityPace     = findViewById(R.id.interval_pace);
     }
 
     private void setupParticipantsList() {
@@ -102,25 +133,23 @@ public class ActiveRunActivity extends AppCompatActivity {
     }
 
     private void setupButtons() {
-        pauseButton.setOnClickListener(v -> {
-            isPaused = !isPaused;
-            updatePauseButton();
-        });
-        updatePauseButton();
+        pauseButton.setOnClickListener(v -> togglePauseState());
+        stopButton.setOnClickListener(v -> stopCurrentRun());
     }
 
-    private void updatePauseButton() {
-        if (isPaused) {
-            setPauseButtonState(
-                    org.runnerup.common.R.string.Resume,
-                    R.drawable.btn_green,
-                    org.runnerup.common.R.drawable.ic_av_play_arrow
-            );
-        } else {
+    // updatePauseButton: Parameter ändern (running statt isPaused-Toggle)
+    private void updatePauseButton(boolean running) {
+        if (running) {
             setPauseButtonState(
                     org.runnerup.common.R.string.Pause,
                     R.drawable.btn_blue,
                     org.runnerup.common.R.drawable.ic_av_pause
+            );
+        } else {
+            setPauseButtonState(
+                    org.runnerup.common.R.string.Resume,
+                    R.drawable.btn_green,
+                    org.runnerup.common.R.drawable.ic_av_play_arrow
             );
         }
     }
@@ -150,6 +179,15 @@ public class ActiveRunActivity extends AppCompatActivity {
 
                 double delta = 0.5 + Math.random() * 0.5;
                 fakeCurrentKm += delta;
+
+                // Nicht mehr senden wenn Ziel erreicht
+                if (fakeCurrentKm >= targetKm) {
+                    fakeCurrentKm = targetKm; // exakt auf Ziel setzen
+                    LiveChallenge.getInstance().sendUpdate(fakeCurrentKm);
+                    Log.d("ActiveRun", "🏁 Finished at " + fakeCurrentKm + " km – stopping updates");
+                    sendingProgress = false; // kein weiterer postDelayed
+                    return;
+                }
 
                 LiveChallenge.getInstance().sendUpdate(fakeCurrentKm);
                 Log.d("ActiveRun", "📡 Progress sent: " + fakeCurrentKm + " km");
@@ -235,5 +273,53 @@ public class ActiveRunActivity extends AppCompatActivity {
             participants.remove(last);
             adapter.notifyItemRemoved(last);
         }
+    }
+
+    private void updateRunStats() {
+        Log.d("LiveRun", "updateRunStats called");
+
+        if (workout == null) {
+            Log.d("LiveRun", "workout == null");
+            return;
+        }
+
+        if (mTracker == null) {
+            Log.d("LiveRun", "mTracker == null");
+            return;
+        }
+
+        if (formatter == null) {
+            Log.d("LiveRun", "formatter == null");
+            return;
+        }
+
+        double time     = workout.getTime(Scope.ACTIVITY);
+        double distance = workout.getDistance(Scope.ACTIVITY);
+        double pace     = workout.getSpeed(Scope.ACTIVITY);
+
+        Log.d("LiveRun", "TIME = " + time);
+        Log.d("LiveRun", "DIST = " + distance);
+        Log.d("LiveRun", "PACE = " + pace);
+
+        activityTime.setText(
+                formatter.formatElapsedTime(
+                        Formatter.Format.TXT_SHORT,
+                        Math.round(time)
+                )
+        );
+
+        activityDistance.setText(
+                formatter.formatDistance(
+                        Formatter.Format.TXT_SHORT,
+                        Math.round(distance)
+                )
+        );
+
+        activityPace.setText(
+                formatter.formatVelocityByPreferredUnit(
+                        Formatter.Format.TXT_SHORT,
+                        pace
+                )
+        );
     }
 }

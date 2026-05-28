@@ -1,5 +1,6 @@
 package org.runnerup.view;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,16 +10,15 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.runnerup.R;
-import org.runnerup.view.ActiveRunActivity;
 
 import java.util.List;
 import java.util.Locale;
 
 public class ParticipantAdapterRun extends RecyclerView.Adapter<ParticipantAdapterRun.ViewHolder> {
 
-    private final List<ActiveRunActivity.Participant> data;
+    private final List<LiveRunActivity.Participant> data;
 
-    public ParticipantAdapterRun(List<ActiveRunActivity.Participant> data) {
+    public ParticipantAdapterRun(List<LiveRunActivity.Participant> data) {
         this.data = data;
     }
 
@@ -54,9 +54,10 @@ public class ParticipantAdapterRun extends RecyclerView.Adapter<ParticipantAdapt
         }
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        ActiveRunActivity.Participant p = data.get(position);
+        LiveRunActivity.Participant p = data.get(position);
         holder.name.setText(p.name);
         if (p.finished) {
             holder.km.setText("Finished");

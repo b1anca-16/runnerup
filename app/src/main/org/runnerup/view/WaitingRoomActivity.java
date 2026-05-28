@@ -6,18 +6,31 @@
 
 package org.runnerup.view;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
+
 import org.runnerup.R;
+import org.runnerup.common.tracker.TrackerState;
+import org.runnerup.common.util.ValueModel;
 import org.runnerup.tracker.LiveChallenge;
+import org.runnerup.tracker.Tracker;
+import org.runnerup.workout.Dimension;
+import org.runnerup.workout.Workout;
+import org.runnerup.workout.WorkoutBuilder;
 
 import java.util.ArrayList;
 
@@ -31,12 +44,84 @@ public class WaitingRoomActivity extends AppCompatActivity {
     private ArrayList<String> participants = new ArrayList<>();
     private ArrayAdapter<String> adapter;
     private static final String EXTRA_ROLE = "ROLE";
+    private Tracker mTracker = null;
+    private boolean mIsBound = false;
+    private org.runnerup.tracker.GpsStatus mGpsStatus = null;
+    private boolean runStartRequested = false;
+    private String runName;
+
+
+    private final ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mTracker = ((Tracker.LocalBinder) service).getService();
+            mTracker.registerTrackerStateListener(trackerStateListener);
+            Log.d("WaitingRoom", "GPS enabled: " +
+                    ((android.location.LocationManager) getSystemService(LOCATION_SERVICE))
+                            .isProviderEnabled(android.location.LocationManager.GPS_PROVIDER));
+
+            // Erst setup(), dann connect()
+            switch (mTracker.getState()) {
+                case INIT:
+                case CLEANUP:
+                    mTracker.setup();
+                    // connect() wird nach setup() durch den StateListener aufgerufen
+                    break;
+                case INITIALIZED:
+                    mTracker.connect();
+                    break;
+                case CONNECTING:
+                case CONNECTED:
+                case STARTED:
+                    // schon bereit
+                    break;
+                default:
+                    mTracker.setup();
+                    break;
+            }
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mTracker = null;
+        }
+    };
+
+    private void tryStartRun() {
+        Log.d("WaitingRoom", "tryStartRun: requested=" + runStartRequested
+                + " tracker=" + mTracker
+                + " state=" + (mTracker != null ? mTracker.getState() : "null"));
+        if (!runStartRequested) return;
+        if (mTracker == null) return;
+        if (mTracker.getState() != TrackerState.CONNECTED) return;
+
+        Workout w = WorkoutBuilder.createDefaultWorkout(
+                getResources(),
+                PreferenceManager.getDefaultSharedPreferences(this),
+                Dimension.DISTANCE
+        );
+        WorkoutBuilder.prepareWorkout(getResources(),
+                PreferenceManager.getDefaultSharedPreferences(this), w);
+        mTracker.setWorkout(w);
+        mTracker.start();
+
+        Intent intent = new Intent(this, LiveRunActivity.class);
+        intent.putExtra(LiveRunActivity.EXTRA_RUN_NAME, runName);
+        startActivity(intent);
+        finish();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_waiting_room);
         String role = getIntent().getStringExtra(EXTRA_ROLE);
+        runName = getIntent().getStringExtra(EXTRA_RUN_NAME);
+
+        mIsBound = getApplicationContext().bindService(
+                new Intent(this, Tracker.class),
+                mConnection,
+                Context.BIND_AUTO_CREATE
+        );
 
         Button startButton = findViewById(R.id.btn_start_run);
         TextView statusText = findViewById(R.id.tv_status);
@@ -56,7 +141,6 @@ public class WaitingRoomActivity extends AppCompatActivity {
                 });
 
         String token      = getIntent().getStringExtra(EXTRA_TOKEN);
-        String runName    = getIntent().getStringExtra(EXTRA_RUN_NAME);
         float distance = getIntent().getFloatExtra(EXTRA_DISTANCE, 5f);
 
         if (getSupportActionBar() != null) {
@@ -77,15 +161,64 @@ public class WaitingRoomActivity extends AppCompatActivity {
         });
 
         LiveChallenge.getInstance().setRunStartedListener(() -> {
-
-            Intent intent = new Intent(this, ActiveRunActivity.class);
-            intent.putExtra(ActiveRunActivity.EXTRA_RUN_NAME, runName);
-            startActivity(intent);
-            finish();
+            Log.d("WaitingRoom", "RunStartedListener fired!");
+            runStartRequested = true;
+            runOnUiThread(this::tryStartRun);
         });
 
         ((Button) findViewById(R.id.btn_start_run)).setOnClickListener(v -> {
             LiveChallenge.getInstance().startRun();
         });
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mIsBound) {
+            getApplicationContext().unbindService(mConnection);
+            mIsBound = false;
+        }
+        if (mGpsStatus != null) {
+            mGpsStatus.stop(null);
+        }
+        if (mTracker != null) {
+            mTracker.unregisterTrackerStateListener(trackerStateListener);
+        }
+    }
+
+    private void updateGpsStatus(TrackerState state) {
+        TextView statusText = findViewById(R.id.tv_status);
+        if (state == TrackerState.CONNECTED) {
+            statusText.setText(R.string.gps_ready);
+        } else {
+            statusText.setText(R.string.Waiting_for_GPS);
+        }
+    }
+
+    private final ValueModel.ChangeListener<TrackerState> trackerStateListener =
+            (instance, oldValue, newValue) -> {
+                Log.d("WaitingRoom", "Tracker state changed: " + oldValue + " -> " + newValue);
+
+                runOnUiThread(() -> {
+                    switch (newValue) {
+                        case INITIALIZED:
+                            mTracker.connect();
+                            break;
+                        case INIT:
+                        case CLEANUP:
+                            // Tracker hat sich zurückgesetzt → neu starten
+                            Log.d("WaitingRoom", "Tracker reset, calling setup() again");
+                            mTracker.setup();
+                            break;
+                        case CONNECTED:
+                            Log.d("WaitingRoom", "✅ GPS CONNECTED!");
+                            updateGpsStatus(newValue);
+                            tryStartRun();
+                            break;
+                        default:
+                            updateGpsStatus(newValue);
+                            break;
+                    }
+                });
+            };
 }
