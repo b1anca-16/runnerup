@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class LiveRunActivity extends BaseRunActivity {
@@ -54,6 +55,7 @@ public class LiveRunActivity extends BaseRunActivity {
     private TextView activityDistance;
     private TextView activityPace;
     private String ownName;
+    private ImageView finishedFlag;
 
     private boolean isOwnRunFinished() {
         for (Participant p : participants) {
@@ -169,6 +171,7 @@ public class LiveRunActivity extends BaseRunActivity {
         activityTime     = findViewById(R.id.run_activity_time);
         activityDistance = findViewById(R.id.intervall_distance);
         activityPace     = findViewById(R.id.interval_pace);
+        finishedFlag = findViewById(R.id.iv_finished_flag);
     }
 
     private void setupParticipantsList() {
@@ -263,7 +266,6 @@ public class LiveRunActivity extends BaseRunActivity {
     }
 
     private void updateParticipantsDiff(List<Participant> newList) {
-        // Serverreihenfolge übernehmen: per Name suchen, nicht per Position
         for (int i = 0; i < newList.size(); i++) {
             Participant incoming = newList.get(i);
 
@@ -307,6 +309,7 @@ public class LiveRunActivity extends BaseRunActivity {
                         togglePauseState();
                         stopButton.setVisibility(View.GONE);
                         leaveButton.setVisibility(View.VISIBLE);
+                        finishedFlag.setVisibility(View.VISIBLE);
                     }
                 }
             }

@@ -8,6 +8,14 @@
     android:padding="32dp">
 
     <!-- Active since -->
+    <ImageView
+        android:id="@+id/iv_finished_flag"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_flag_24dp"
+        android:visibility="gone"
+        android:layout_marginBottom="8dp" />
+
     <TableRow
         android:id="@+id/run_table_row3"
         android:layout_width="fill_parent"
