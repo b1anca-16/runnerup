@@ -113,7 +113,6 @@ public class LiveRunActivity extends BaseRunActivity {
 
     @Override
     protected void stopCurrentRun() {
-        // Callbacks sofort entfernen um weitere Events zu blockieren
         LiveChallenge.getInstance().setLeaderboardListener(null);
         LiveChallenge.getInstance().setRunStartedListener(null);
         LiveChallenge.getInstance().setParticipantCallback(null);
@@ -122,7 +121,8 @@ public class LiveRunActivity extends BaseRunActivity {
 
         workout.onStop(workout);
         stopTimer();
-        mTracker.stopForeground(true);
+
+        // NICHT hier stopForeground aufrufen – das passiert in handleDetailActivityResult
 
         Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra("mode", "save");

@@ -166,9 +166,13 @@ public abstract class BaseRunActivity extends AppCompatActivity implements TickL
             }
 
             workout.onComplete(Scope.ACTIVITY, workout);
+            mTracker.stopForeground(true);
             mTracker.completeActivity(true, manualDistance);
 
             mTracker = null;
+            Intent intent = new Intent(this, MainLayout.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
             finish();
 
         } else if (resultCode == RESULT_CANCELED) {
@@ -176,6 +180,9 @@ public abstract class BaseRunActivity extends AppCompatActivity implements TickL
             mTracker.completeActivity(false, null);
 
             mTracker = null;
+            Intent intent = new Intent(this, MainLayout.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
             finish();
 
         } else if (resultCode == RESULT_FIRST_USER) {
