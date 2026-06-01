@@ -28,7 +28,7 @@ public class LiveChallenge {
     private List<String> lastParticipants = new ArrayList<>();
 
     public interface OnTokenReceived {
-        void onToken(String token);
+        void onToken(String token, String runName);
         void onPartnerJoined();
         void onError(String message);
     }
@@ -81,9 +81,11 @@ public class LiveChallenge {
         }
     }
 
-    public void connectAndCreate(String playerName, float distance, OnTokenReceived callback) {
+    public void connectAndCreate(String playerName, String runName, float distance, OnTokenReceived callback) {
         this.tokenCallback = callback;
-        connectInternal(() -> send("{\"action\":\"create\",\"name\":\"" + playerName + "\",\"distance\":" + distance + "}"));
+        connectInternal(() -> send("{\"action\":\"create\",\"name\":\"" + playerName
+                + "\",\"runName\":\"" + runName
+                + "\",\"distance\":" + distance + "}"));
     }
 
     public void connectAndJoin(String roomCode, String playerName, OnTokenReceived callback) {
@@ -122,6 +124,9 @@ public class LiveChallenge {
     private void handleMessage(String text) {
         if (text.contains("\"action\":\"created\"") || text.contains("\"action\":\"joined\"")) {
             String token = extractToken(text);
+            String runName = text.contains("\"runName\"")
+                    ? text.split("\"runName\":\"")[1].split("\"")[0]
+                    : "";
             roomId = token;
 
             // Teilnehmer direkt aus der Antwort lesen falls vorhanden
@@ -131,7 +136,8 @@ public class LiveChallenge {
                 postToMain(() -> { if (participantCallback != null) participantCallback.onParticipantsUpdated(names); });
             }
 
-            postToMain(() -> { if (tokenCallback != null) tokenCallback.onToken(token); });
+            final String finalRunName = runName;
+            postToMain(() -> { if (tokenCallback != null) tokenCallback.onToken(token, finalRunName); });
 
         } else if (text.contains("\"action\":\"partner_joined\"")) {
             postToMain(() -> { if (tokenCallback != null) tokenCallback.onPartnerJoined(); });

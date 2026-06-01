@@ -36,9 +36,9 @@ public class CommunityFragment extends Fragment {
         dialog.setOnRunCreated(new CreateRunDialogFragment.OnRunCreated() {
             @Override
             public void onCreate(String playerName, String runName, float distance) {
-                LiveChallenge.getInstance().connectAndCreate(playerName, distance,new LiveChallenge.OnTokenReceived() {
+                LiveChallenge.getInstance().connectAndCreate(playerName, runName, distance, new LiveChallenge.OnTokenReceived() {
                     @Override
-                    public void onToken(String token) {
+                    public void onToken(String token, String receivedRunName) {  // ← neu
                         openWaitingRoom(token, runName, playerName, "HOST", distance);
                     }
                     @Override
@@ -53,7 +53,7 @@ public class CommunityFragment extends Fragment {
                 });
             }
             @Override
-            public void onJoin(String playerName, String code) {} // nicht genutzt
+            public void onJoin(String playerName, String code) {}
         });
         dialog.show(getParentFragmentManager(), "create_run_dialog");
     }
@@ -63,13 +63,13 @@ public class CommunityFragment extends Fragment {
         dialog.setMode(CreateRunDialogFragment.Mode.JOIN);
         dialog.setOnRunCreated(new CreateRunDialogFragment.OnRunCreated() {
             @Override
-            public void onCreate(String playerName, String runName, float distance) {} // nicht genutzt
+            public void onCreate(String playerName, String runName, float distance) {}
             @Override
             public void onJoin(String playerName, String code) {
                 LiveChallenge.getInstance().connectAndJoin(code, playerName, new LiveChallenge.OnTokenReceived() {
                     @Override
-                    public void onToken(String token) {
-                        openWaitingRoom(token, null, playerName, "JOIN", 0f);
+                    public void onToken(String token, String receivedRunName) {  // ← runName kommt jetzt vom Server
+                        openWaitingRoom(token, receivedRunName, playerName, "JOIN", 0f);
                     }
                     @Override
                     public void onPartnerJoined() {
