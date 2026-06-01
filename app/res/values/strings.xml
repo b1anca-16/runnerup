@@ -31,4 +31,5 @@
   <string name="community_run_subtitle">Create or join a Community Run</string>
     <string name="gps_ready">GPS ready</string>
   <string name="Waiting_for_GPS">Waiting fpr GPS...</string>
+    <string name="leave_run">Leave run</string>
 </resources>

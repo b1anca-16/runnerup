@@ -177,6 +177,11 @@ public class LiveChallenge {
         send(json);
     }
 
+    public void sendLeave() {
+        Log.d(TAG, "sendLeave() aufgerufen, ws=" + ws);
+        send("{\"action\":\"leave\"}");
+    }
+
     public void disconnect() {
         if (ws != null) ws.close(1000, "Session ended");
     }

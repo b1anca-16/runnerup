@@ -114,6 +114,14 @@
             android:drawableEnd="@drawable/ic_av_stop"
             android:drawablePadding="-32dp" />
 
+        <Button
+            android:id="@+id/leave_button"
+            style="@style/BlueButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/leave_run"
+            android:visibility="gone" />
+
     </TableRow>
 
 </LinearLayout>

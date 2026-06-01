@@ -3,6 +3,7 @@ package org.runnerup.view;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 
 import androidx.appcompat.content.res.AppCompatResources;
@@ -41,6 +42,7 @@ public class LiveRunActivity extends BaseRunActivity {
     }
 
     private Button stopButton;
+    private Button leaveButton;
     private Handler progressHandler = new Handler(Looper.getMainLooper());
     private Runnable progressRunnable;
     private boolean sendingProgress = false;
@@ -52,6 +54,15 @@ public class LiveRunActivity extends BaseRunActivity {
     private TextView activityDistance;
     private TextView activityPace;
     private String ownName;
+
+    private boolean isOwnRunFinished() {
+        for (Participant p : participants) {
+            if (ownName != null && ownName.equals(p.name)) {
+                return p.finished;
+            }
+        }
+        return false;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,12 +128,21 @@ public class LiveRunActivity extends BaseRunActivity {
         LiveChallenge.getInstance().setRunStartedListener(null);
         LiveChallenge.getInstance().setParticipantCallback(null);
 
+        if (isOwnRunFinished()) {
+            LiveChallenge.getInstance().sendLeave();
+            // kurz warten damit die Nachricht noch ankommt
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                launchDetailActivity();
+            }, 300);
+        } else {
+            LiveChallenge.getInstance().disconnect();
+            launchDetailActivity();
+        }
+
         if (timer == null || workout == null || mTracker == null) return;
 
         workout.onStop(workout);
         stopTimer();
-
-        // NICHT hier stopForeground aufrufen – das passiert in handleDetailActivityResult
 
         Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra("mode", "save");
@@ -145,6 +165,7 @@ public class LiveRunActivity extends BaseRunActivity {
     private void bindViews() {
         participantsRecyclerView = findViewById(R.id.rv_participants);
         stopButton   = findViewById(R.id.stop_button);
+        leaveButton   = findViewById(R.id.leave_button);
         activityTime     = findViewById(R.id.run_activity_time);
         activityDistance = findViewById(R.id.intervall_distance);
         activityPace     = findViewById(R.id.interval_pace);
@@ -162,6 +183,7 @@ public class LiveRunActivity extends BaseRunActivity {
         stopButton.setOnClickListener(v -> {
             stopCurrentRun();
         });
+        leaveButton.setOnClickListener(v -> stopCurrentRun());
     }
 
     private void setupLiveCallbacks() {
@@ -229,6 +251,17 @@ public class LiveRunActivity extends BaseRunActivity {
         return result;
     }
 
+    private void launchDetailActivity() {
+        if (timer == null || workout == null || mTracker == null) return;
+        workout.onStop(workout);
+        stopTimer();
+        Intent intent = new Intent(this, DetailActivity.class);
+        intent.putExtra("mode", "save");
+        intent.putExtra("ID", mTracker.getActivityId());
+        intent.putExtra("no_resume", true);
+        detailActivityLauncher.launch(intent);
+    }
+
     private void updateParticipantsDiff(List<Participant> newList) {
         // Serverreihenfolge übernehmen: per Name suchen, nicht per Position
         for (int i = 0; i < newList.size(); i++) {
@@ -272,6 +305,8 @@ public class LiveRunActivity extends BaseRunActivity {
                             && workout != null
                             && !workout.isPaused()) {
                         togglePauseState();
+                        stopButton.setVisibility(View.GONE);
+                        leaveButton.setVisibility(View.VISIBLE);
                     }
                 }
             }
