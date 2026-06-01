@@ -50,6 +50,7 @@ public class WaitingRoomActivity extends AppCompatActivity {
     private boolean runStartRequested = false;
     private String runName;
     private String playerName;
+    private Button startButton;
 
 
     private final ServiceConnection mConnection = new ServiceConnection() {
@@ -126,7 +127,9 @@ public class WaitingRoomActivity extends AppCompatActivity {
                 Context.BIND_AUTO_CREATE
         );
 
-        Button startButton = findViewById(R.id.btn_start_run);
+        startButton = findViewById(R.id.btn_start_run);
+        startButton.setEnabled(false);
+        startButton.setAlpha(0.4f);
         TextView statusText = findViewById(R.id.tv_status);
         boolean isHost = "HOST".equals(role);
         startButton.setVisibility(isHost ? View.VISIBLE : View.GONE);
@@ -215,6 +218,8 @@ public class WaitingRoomActivity extends AppCompatActivity {
                             break;
                         case CONNECTED:
                             Log.d("WaitingRoom", "✅ GPS CONNECTED!");
+                            startButton.setEnabled(true);
+                            startButton.setAlpha(1.0f);
                             updateGpsStatus(newValue);
                             tryStartRun();
                             break;
