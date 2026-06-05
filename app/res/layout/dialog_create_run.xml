@@ -9,9 +9,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/create_run"
-        android:textSize="20sp"
+        android:textSize="26sp"
         android:textStyle="bold"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/create_run_subtitle"
+        android:textSize="14sp"
+        android:textColor="#777777"
+        android:layout_marginBottom="30dp"/>
 
     <EditText
         android:id="@+id/et_player_name"
@@ -20,7 +28,8 @@
         android:hint="@string/your_nickname"
         android:autofillHints="username"
         android:inputType="textPersonName"
-        android:layout_marginBottom="12dp"/>
+        android:layout_marginBottom="12dp"
+        />
 
     <EditText
         android:id="@+id/et_run_name"
@@ -48,16 +57,18 @@
 
         <Button
             android:id="@+id/btn_cancel"
-            style="?android:attr/buttonBarButtonStyle"
+            style="@style/BlueButton"
             android:layout_width="wrap_content"
+            android:drawableStart="@drawable/ic_cancel_white_24dp"
             android:layout_height="wrap_content"
             android:text="@string/Cancel"/>
 
         <Button
             android:id="@+id/btn_confirm"
-            style="?android:attr/buttonBarButtonStyle"
+            style="@style/BlueButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_add_white_24dp"
             android:text="@string/Create"
             android:layout_marginStart="8dp"/>
     </LinearLayout>

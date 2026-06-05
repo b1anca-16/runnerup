@@ -29,7 +29,8 @@
     <string name="run_distance">Distance</string>
   <string name="distance_placeholder">Distance: %.1f km</string>
   <string name="community_run_subtitle">Create or join a Community Run</string>
+  <string name="create_run_subtitle">Fill in the details and off you go</string>
     <string name="gps_ready">GPS ready</string>
-  <string name="Waiting_for_GPS">Waiting for GPS...</string>
+  <string name="Waiting_for_GPS">Waiting for GPS</string>
     <string name="leave_run">Leave run</string>
 </resources>
