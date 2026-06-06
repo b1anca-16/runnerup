@@ -33,4 +33,7 @@
     <string name="gps_ready">GPS ready</string>
   <string name="Waiting_for_GPS">Waiting for GPS</string>
     <string name="leave_run">Leave run</string>
+  <string name="label_code">CODE</string>
+  <string name="label_distance">DISTANCE</string>
+  <string name="host">Host</string>
 </resources>

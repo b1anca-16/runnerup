@@ -153,10 +153,39 @@ public class WaitingRoomActivity extends AppCompatActivity {
             getSupportActionBar().setTitle(runName);
         }
 
-        ((TextView) findViewById(R.id.tv_token)).setText(getString(R.string.code_placeholder, token));
-        ((TextView) findViewById(R.id.tv_distance)).setText(getString(R.string.distance_placeholder, distance));
+        ((TextView) findViewById(R.id.tv_token)).setText(token);
+        ((TextView) findViewById(R.id.tv_distance)).setText(String.format(java.util.Locale.US, "%.1f km", distance));
 
-        adapter = new ArrayAdapter<>(this, R.layout.item_participant, participants);
+        adapter = new ArrayAdapter<String>(this, R.layout.item_participant, participants) {
+            @Override
+            public View getView(int position, View convertView, android.view.ViewGroup parent) {
+                if (convertView == null) {
+                    convertView = getLayoutInflater().inflate(R.layout.item_participant, parent, false);
+                }
+                String fullName = getItem(position);
+
+                // Avatar: erster Buchstabe des Namens
+                TextView tvAvatar = convertView.findViewById(R.id.tv_avatar);
+                TextView tvName   = convertView.findViewById(R.id.tv_participant_name);
+                TextView tvBadge  = convertView.findViewById(R.id.tv_host_badge);
+
+                String displayName = fullName;
+                boolean isHost = fullName != null && fullName.contains("(Host)");
+
+                if (isHost && fullName != null) {
+                    displayName = fullName.replace("(Host)", "").trim();
+                }
+
+                tvAvatar.setText(displayName != null && !displayName.isEmpty()
+                        ? String.valueOf(displayName.charAt(0)).toUpperCase()
+                        : "?");
+                tvName.setText(displayName);
+                tvBadge.setVisibility(isHost ? View.VISIBLE : View.GONE);
+
+                return convertView;
+            }
+        };
+
         ((ListView) findViewById(R.id.lv_participants)).setAdapter(adapter);
 
         // 2. Callback registrieren ← HIER

@@ -1,7 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/item_participant_root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:textSize="20sp"
-    android:padding="8dp"
-    android:gravity="center"/>
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:background="@drawable/bg_participant_row">
+
+    <TextView
+        android:id="@+id/tv_avatar"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:gravity="center"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:textColor="@color/colorPrimaryFab"
+        android:background="@drawable/bg_avatar_circle"/>
+
+    <TextView
+        android:id="@+id/tv_participant_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textSize="14sp"
+        android:textColor="@color/colorText"
+        android:layout_marginStart="10dp"/>
+
+    <TextView
+        android:id="@+id/tv_host_badge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/host"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:textColor="@color/colorPrimaryFab"
+        android:background="@drawable/bg_host_badge"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
+        android:visibility="gone"/>
+
+</LinearLayout>
