@@ -35,5 +35,8 @@
     <string name="leave_run">Leave run</string>
   <string name="label_code">CODE</string>
   <string name="label_distance">DISTANCE</string>
+  <string name="label_pace">PACE</string>
   <string name="host">Host</string>
+  <string name="label_time">TIME</string>
+  <string name="label_progress">PROGRESS</string>
 </resources>

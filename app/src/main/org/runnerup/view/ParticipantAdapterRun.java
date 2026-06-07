@@ -61,9 +61,7 @@ public class ParticipantAdapterRun extends RecyclerView.Adapter<ParticipantAdapt
         holder.name.setText(p.place + ". " + p.name);
         if (p.finished) {
             holder.km.setText("Finished");
-            holder.itemView.setBackgroundColor(
-                    holder.itemView.getContext().getColor(android.R.color.holo_green_light)
-            );
+            holder.itemView.setBackgroundColor(android.graphics.Color.parseColor("#1A3D1A"));
         } else {
             holder.km.setText(String.format(Locale.getDefault(), "%.2f km", p.km));
             holder.itemView.setBackgroundColor(android.graphics.Color.TRANSPARENT);
