@@ -51,6 +51,7 @@ public class WaitingRoomActivity extends AppCompatActivity {
     private String runName;
     private String playerName;
     private Button startButton;
+    private float distance = 5.0f;
 
 
     private final ServiceConnection mConnection = new ServiceConnection() {
@@ -109,6 +110,7 @@ public class WaitingRoomActivity extends AppCompatActivity {
         Intent intent = new Intent(this, LiveRunActivity.class);
         intent.putExtra(LiveRunActivity.EXTRA_RUN_NAME, runName);
         intent.putExtra("PLAYER_NAME", playerName);
+        intent.putExtra("DISTANCE", distance);
         startActivity(intent);
         finish();
     }
@@ -147,7 +149,7 @@ public class WaitingRoomActivity extends AppCompatActivity {
                 });
 
         String token      = getIntent().getStringExtra(EXTRA_TOKEN);
-        float distance = getIntent().getFloatExtra(EXTRA_DISTANCE, 5f);
+        distance = getIntent().getFloatExtra(EXTRA_DISTANCE, 5f);
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(runName);

@@ -215,8 +215,11 @@ public class LiveRunActivity extends BaseRunActivity {
                 if (fakeCurrentKm >= targetKm) {
                     fakeCurrentKm = targetKm;
                     LiveChallenge.getInstance().sendUpdate(fakeCurrentKm);
-                    // UI mit finalem Wert updaten
-                    runOnUiThread(() -> updateFakeUI(fakeCurrentKm));
+                    runOnUiThread(() -> {
+                        updateFakeUI(fakeCurrentKm);
+                        // Finish lokal auslösen – unabhängig vom Server
+                        showFinishState();
+                    });
                     sendingProgress = false;
                     return;
                 }
@@ -380,7 +383,7 @@ public class LiveRunActivity extends BaseRunActivity {
                 formatter.formatElapsedTime(Formatter.Format.TXT_SHORT, Math.round(time)));
 
         // Distance und Progressbar nur mit echten GPS-Daten überschreiben
-        // Im Test-Modus (distance == 0) macht updateFakeUI() das stattdessen
+        // im Test-Modus (distance == 0) macht updateFakeUI() das stattdessen
         if (distance > 0) {
             activityDistance.setText(
                     formatter.formatDistance(Formatter.Format.TXT_SHORT, Math.round(distance)));
@@ -391,5 +394,44 @@ public class LiveRunActivity extends BaseRunActivity {
 
         activityPace.setText(
                 formatter.formatVelocityByPreferredUnit(Formatter.Format.TXT_SHORT, pace));
+    }
+
+    private void showFinishState() {
+
+        View finishBlock = findViewById(R.id.layout_finish_block);
+        if (finishBlock != null) finishBlock.setVisibility(View.VISIBLE);
+
+        // Eigenen Eintrag zuerst als finished markieren
+        for (int i = 0; i < participants.size(); i++) {
+            if (ownName != null && ownName.equals(participants.get(i).name)) {
+                participants.get(i).finished = true;
+                adapter.notifyItemChanged(i);
+                break;
+            }
+        }
+
+        // Danach zählen
+        int finishedCount = 0;
+        int runningCount = 0;
+
+        for (Participant p : participants) {
+            if (p.finished) {
+                finishedCount++;
+            } else {
+                runningCount++;
+            }
+        }
+
+        TextView tvFinished = findViewById(R.id.tv_finished_count);
+        TextView tvRunning = findViewById(R.id.tv_running_count);
+
+        if (tvFinished != null) tvFinished.setText(String.valueOf(finishedCount));
+        if (tvRunning != null) tvRunning.setText(String.valueOf(runningCount));
+
+        // Buttons umschalten
+        if (workout != null && !workout.isPaused()) togglePauseState();
+
+        stopButton.setVisibility(View.GONE);
+        leaveButton.setVisibility(View.VISIBLE);
     }
 }

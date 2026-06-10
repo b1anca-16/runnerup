@@ -8,14 +8,14 @@
     android:paddingBottom="9dp"
     android:paddingStart="4dp"
     android:paddingEnd="4dp"
-    android:background="@android:color/transparent">
+    android:background="@drawable/bg_participant_row">
 
     <TextView
         android:id="@+id/tv_rank_circle"
         android:layout_width="28dp"
         android:layout_height="28dp"
         android:gravity="center"
-        android:textSize="11sp"
+        android:textSize="15sp"
         android:textStyle="bold"
         android:textColor="@color/colorPrimaryFab"
         android:background="@drawable/bg_avatar_circle"/>
@@ -25,7 +25,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:textSize="13sp"
+        android:textSize="18sp"
         android:textColor="@color/colorText"
         android:layout_marginStart="10dp"/>
 
@@ -33,7 +33,7 @@
         android:id="@+id/tv_km"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="13sp"
+        android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="@color/colorText"/>
 

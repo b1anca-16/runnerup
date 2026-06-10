@@ -39,4 +39,8 @@
   <string name="host">Host</string>
   <string name="label_time">TIME</string>
   <string name="label_progress">PROGRESS</string>
+  <string name="finish_congrats_title">You finished!</string>
+  <string name="finish_congrats_subtitle">Great run - you\'ve completed the distance!</string>
+  <string name="label_finished">finished</string>
+  <string name="label_still_running">still running</string>
 </resources>

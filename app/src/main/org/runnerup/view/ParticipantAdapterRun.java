@@ -23,13 +23,15 @@ public class ParticipantAdapterRun extends RecyclerView.Adapter<ParticipantAdapt
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView avatar;
         TextView name;
         TextView km;
 
         ViewHolder(View itemView) {
             super(itemView);
-            name = itemView.findViewById(R.id.tv_name);
-            km = itemView.findViewById(R.id.tv_km);
+            avatar = itemView.findViewById(R.id.tv_rank_circle);
+            name   = itemView.findViewById(R.id.tv_name);
+            km     = itemView.findViewById(R.id.tv_km);
         }
     }
 
@@ -58,13 +60,40 @@ public class ParticipantAdapterRun extends RecyclerView.Adapter<ParticipantAdapt
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         LiveRunActivity.Participant p = data.get(position);
+
+        // Avatar: erster Buchstabe des Namens
+        String displayName = p.name != null ? p.name : "?";
+        holder.avatar.setText(
+                displayName.isEmpty() ? "?" : String.valueOf(displayName.charAt(0)).toUpperCase()
+        );
+
         holder.name.setText(p.place + ". " + p.name);
+
         if (p.finished) {
             holder.km.setText("Finished");
-            holder.itemView.setBackgroundColor(android.graphics.Color.parseColor("#1A3D1A"));
+            holder.itemView.setBackgroundColor(
+                    android.graphics.Color.parseColor("#1A3D1A")
+            );
+            holder.name.setTextColor(
+                    android.graphics.Color.parseColor("#A5D6A7")
+            );
+            holder.km.setTextColor(
+                    android.graphics.Color.parseColor("#4CAF50")
+            );
+            holder.avatar.setTextColor(
+                    android.graphics.Color.parseColor("#4CAF50")
+            );
+            holder.avatar.setBackgroundResource(R.drawable.bg_avatar_circle_green);
         } else {
-            holder.km.setText(String.format(Locale.getDefault(), "%.2f km", p.km));
             holder.itemView.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+            holder.km.setText(String.format(Locale.getDefault(), "%.2f km", p.km));
+            // Farben zurücksetzen
+            int blue = android.graphics.Color.parseColor("#378ADD");
+            int light = android.graphics.Color.parseColor("#E8F2FB");
+            holder.name.setTextColor(light);
+            holder.km.setTextColor(light);
+            holder.avatar.setTextColor(blue);
+            holder.avatar.setBackgroundResource(R.drawable.bg_avatar_circle);
         }
     }
 

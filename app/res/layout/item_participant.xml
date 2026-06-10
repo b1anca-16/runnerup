@@ -14,7 +14,7 @@
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:gravity="center"
-        android:textSize="12sp"
+        android:textSize="15sp"
         android:textStyle="bold"
         android:textColor="@color/colorPrimaryFab"
         android:background="@drawable/bg_avatar_circle"/>
@@ -24,7 +24,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:textSize="14sp"
+        android:textSize="18sp"
         android:textColor="@color/colorText"
         android:layout_marginStart="10dp"/>
 
@@ -33,7 +33,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/host"
-        android:textSize="15sp"
+        android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="@color/colorPrimaryFab"
         android:background="@drawable/bg_host_badge"
