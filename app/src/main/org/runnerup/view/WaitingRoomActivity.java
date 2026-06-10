@@ -62,12 +62,10 @@ public class WaitingRoomActivity extends AppCompatActivity {
                     ((android.location.LocationManager) getSystemService(LOCATION_SERVICE))
                             .isProviderEnabled(android.location.LocationManager.GPS_PROVIDER));
 
-            // Erst setup(), dann connect()
             switch (mTracker.getState()) {
                 case INIT:
                 case CLEANUP:
                     mTracker.setup();
-                    // connect() wird nach setup() durch den StateListener aufgerufen
                     break;
                 case INITIALIZED:
                     mTracker.connect();
@@ -75,7 +73,6 @@ public class WaitingRoomActivity extends AppCompatActivity {
                 case CONNECTING:
                 case CONNECTED:
                 case STARTED:
-                    // schon bereit
                     break;
                 default:
                     mTracker.setup();
@@ -104,11 +101,11 @@ public class WaitingRoomActivity extends AppCompatActivity {
         WorkoutBuilder.prepareWorkout(getResources(),
                 PreferenceManager.getDefaultSharedPreferences(this), w);
         mTracker.setWorkout(w);
-        mTracker.start();
 
-        Intent intent = new Intent(this, LiveRunActivity.class);
-        intent.putExtra(LiveRunActivity.EXTRA_RUN_NAME, runName);
-        intent.putExtra("PLAYER_NAME", playerName);
+        Intent intent = new Intent(this, CountdownActivity.class);
+        intent.putExtra(CountdownActivity.EXTRA_RUN_NAME, runName);
+        intent.putExtra(CountdownActivity.EXTRA_PLAYER_NAME, playerName);
+        intent.putExtra(CountdownActivity.EXTRA_TOKEN, getIntent().getStringExtra(EXTRA_TOKEN));
         startActivity(intent);
         finish();
     }
@@ -212,7 +209,6 @@ public class WaitingRoomActivity extends AppCompatActivity {
                             break;
                         case INIT:
                         case CLEANUP:
-                            // Tracker hat sich zurückgesetzt → neu starten
                             Log.d("WaitingRoom", "Tracker reset, calling setup() again");
                             mTracker.setup();
                             break;

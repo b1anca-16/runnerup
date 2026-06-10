@@ -32,4 +32,6 @@
     <string name="gps_ready">GPS ready</string>
   <string name="Waiting_for_GPS">Waiting for GPS...</string>
     <string name="leave_run">Leave run</string>
+  <string name="countdown_go">GO!</string>/>
+  <string name="run_starts_in">Run begins</string>
 </resources>
