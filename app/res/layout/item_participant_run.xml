@@ -3,20 +3,38 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="12dp">
+    android:gravity="center_vertical"
+    android:paddingTop="9dp"
+    android:paddingBottom="9dp"
+    android:paddingStart="4dp"
+    android:paddingEnd="4dp"
+    android:background="@android:color/transparent">
+
+    <TextView
+        android:id="@+id/tv_rank_circle"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:gravity="center"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:textColor="@color/colorPrimaryFab"
+        android:background="@drawable/bg_avatar_circle"/>
 
     <TextView
         android:id="@+id/tv_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"/>
+        android:textSize="13sp"
+        android:textColor="@color/colorText"
+        android:layout_marginStart="10dp"/>
 
     <TextView
         android:id="@+id/tv_km"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"/>
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:textColor="@color/colorText"/>
+
 </LinearLayout>

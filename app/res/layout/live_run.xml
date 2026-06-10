@@ -12,6 +12,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:baselineAligned="false"
         android:orientation="horizontal"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="14dp">
@@ -67,7 +68,7 @@
                 android:letterSpacing="0.08"/>
 
             <TextView
-                android:id="@+id/tv_distance"
+                android:id="@+id/intervall_distance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
@@ -106,11 +107,84 @@
                 android:layout_marginTop="3dp"/>
 
         </LinearLayout>
+    </LinearLayout>
+
+    <!-- Progress Card -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/ic_bg_card_dark"
+        android:padding="12dp"
+        android:layout_marginBottom="14dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/label_progress"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimaryFab"
+                android:letterSpacing="0.08"/>
+
+            <TextView
+                android:id="@+id/tv_progress_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:textColor="@color/colorPrimaryFab"/>
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="6dp"
+            android:background="@drawable/bg_progress_track">
+
+            <View
+                android:id="@+id/v_progress_fill"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_progress_fill"/>
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="5dp">
+
+            <TextView
+                android:id="@+id/tv_progress_percent"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="11sp"
+                android:textColor="@color/colorPrimaryFab"/>
+
+            <TextView
+                android:id="@+id/tv_progress_remaining"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:textColor="@color/colorPrimaryFab"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 
     <!-- Finished Flag (hidden by default) -->
     <ImageView
+        android:contentDescription="@null"
         android:id="@+id/iv_finished_flag"
         android:layout_width="40dp"
         android:layout_height="40dp"
@@ -120,48 +194,49 @@
         android:layout_marginBottom="8dp"/>
 
 
+    <!-- Live Ranking Label -->
     <TextView
         android:id="@+id/live_ranking"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/live_ranking"
-        android:textColor="#FFFFFF"
-        android:textSize="25sp"
+        android:textSize="20sp"
         android:textStyle="bold"
-        android:layout_marginBottom="15dp"
-        />
+        android:textColor="@color/colorText"
+        android:letterSpacing="0.08"
+        android:layout_marginBottom="10dp"/>
 
-
+    <!-- Ranking List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_participants"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingTop="8dp"/>
+        android:paddingTop="4dp"/>
 
-    <TableRow
-        android:id="@+id/run_table_row1"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
+    <!-- Cancel Button (während Lauf) -->
+    <Button
+        android:id="@+id/stop_button"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="@string/Cancel"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:background="@color/colorPrimaryFab"
+        android:layout_marginTop="8dp"/>
 
-        <Button
-            android:id="@+id/stop_button"
-            style="@style/ButtonText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/btn_red"
-            android:text="@string/Cancel"
-            android:drawableEnd="@drawable/ic_av_stop"
-            android:drawablePadding="-32dp" />
-
-        <Button
-            android:id="@+id/leave_button"
-            style="@style/BlueButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/leave_run"
-            android:visibility="gone" />
-
-    </TableRow>
+    <!-- Leave Button (anzeige nach Finish, standardmäßig versteckt) -->
+    <Button
+        android:id="@+id/leave_button"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="@string/leave_run"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:background="@color/colorPrimary"
+        android:layout_marginTop="8dp"
+        android:visibility="gone"/>
 
 </LinearLayout>

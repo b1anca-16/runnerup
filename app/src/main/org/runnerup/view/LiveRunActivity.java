@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.view.ViewCompat;
 
 import org.runnerup.R;
@@ -56,6 +55,7 @@ public class LiveRunActivity extends BaseRunActivity {
     private TextView activityPace;
     private String ownName;
     private ImageView finishedFlag;
+    private double fakeCurrentKm = 0.0;
 
     private boolean isOwnRunFinished() {
         for (Participant p : participants) {
@@ -86,6 +86,8 @@ public class LiveRunActivity extends BaseRunActivity {
 
         String runName = getIntent().getStringExtra(EXTRA_RUN_NAME);
         ownName = getIntent().getStringExtra("PLAYER_NAME");
+        targetKm = getIntent().getFloatExtra("DISTANCE", 5.0f);
+
         if (getSupportActionBar() != null && runName != null) {
             getSupportActionBar().setTitle(runName);
         }
@@ -132,7 +134,6 @@ public class LiveRunActivity extends BaseRunActivity {
 
         if (isOwnRunFinished()) {
             LiveChallenge.getInstance().sendLeave();
-            // kurz warten damit die Nachricht noch ankommt
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 launchDetailActivity();
             }, 300);
@@ -166,12 +167,12 @@ public class LiveRunActivity extends BaseRunActivity {
 
     private void bindViews() {
         participantsRecyclerView = findViewById(R.id.rv_participants);
-        stopButton   = findViewById(R.id.stop_button);
-        leaveButton   = findViewById(R.id.leave_button);
+        stopButton       = findViewById(R.id.stop_button);
+        leaveButton      = findViewById(R.id.leave_button);
         activityTime     = findViewById(R.id.run_activity_time);
         activityDistance = findViewById(R.id.intervall_distance);
         activityPace     = findViewById(R.id.interval_pace);
-        finishedFlag = findViewById(R.id.iv_finished_flag);
+        finishedFlag     = findViewById(R.id.iv_finished_flag);
     }
 
     private void setupParticipantsList() {
@@ -183,9 +184,7 @@ public class LiveRunActivity extends BaseRunActivity {
     }
 
     private void setupButtons() {
-        stopButton.setOnClickListener(v -> {
-            stopCurrentRun();
-        });
+        stopButton.setOnClickListener(v -> stopCurrentRun());
         leaveButton.setOnClickListener(v -> stopCurrentRun());
     }
 
@@ -202,8 +201,6 @@ public class LiveRunActivity extends BaseRunActivity {
         });
     }
 
-    private double fakeCurrentKm = 0.0;
-
     private void startProgressSending() {
         sendingProgress = true;
 
@@ -215,22 +212,71 @@ public class LiveRunActivity extends BaseRunActivity {
                 double delta = 0.5 + Math.random() * 0.5;
                 fakeCurrentKm += delta;
 
-                // Nicht mehr senden wenn Ziel erreicht
                 if (fakeCurrentKm >= targetKm) {
-                    fakeCurrentKm = targetKm; // exakt auf Ziel setzen
+                    fakeCurrentKm = targetKm;
                     LiveChallenge.getInstance().sendUpdate(fakeCurrentKm);
-                    sendingProgress = false; // kein weiterer postDelayed
+                    // UI mit finalem Wert updaten
+                    runOnUiThread(() -> updateFakeUI(fakeCurrentKm));
+                    sendingProgress = false;
                     return;
                 }
 
                 LiveChallenge.getInstance().sendUpdate(fakeCurrentKm);
                 Log.d("ActiveRun", "📡 Progress sent: " + fakeCurrentKm + " km");
 
+                // UI direkt mit Fake-Km updaten – gleiche Quelle wie Leaderboard
+                runOnUiThread(() -> updateFakeUI(fakeCurrentKm));
+
                 progressHandler.postDelayed(this, 10_000);
             }
         };
 
         progressHandler.post(progressRunnable);
+    }
+
+    /**
+     * Aktualisiert Distance-Anzeige und Progressbar mit den Fake-Km.
+     * Gleiche Logik wie das Live-Ranking – direkt aus fakeCurrentKm.
+     */
+    private void updateFakeUI(double km) {
+        // Distance-Karte updaten
+        if (activityDistance != null) {
+            activityDistance.setText(String.format(java.util.Locale.US, "%.2f km", km));
+        }
+
+        // Progressbar updaten
+        View fill = findViewById(R.id.v_progress_fill);
+        if (fill == null) return;
+
+        View track = (View) fill.getParent();
+        if (track == null) return;
+
+        int trackWidth = track.getWidth();
+        if (trackWidth == 0) {
+            // Layout noch nicht gezeichnet → nächsten Frame abwarten
+            track.post(() -> updateFakeUI(km));
+            return;
+        }
+
+        float ratio = (float) Math.min(km / targetKm, 1.0);
+        android.view.ViewGroup.LayoutParams lp = fill.getLayoutParams();
+        lp.width = (int) (trackWidth * ratio);
+        fill.setLayoutParams(lp);
+
+        int percent = (int) (ratio * 100);
+
+        TextView tvLabel     = findViewById(R.id.tv_progress_label);
+        TextView tvPercent   = findViewById(R.id.tv_progress_percent);
+        TextView tvRemaining = findViewById(R.id.tv_progress_remaining);
+
+        if (tvLabel != null)
+            tvLabel.setText(String.format(java.util.Locale.US,
+                    "%.2f / %.1f km", km, targetKm));
+        if (tvPercent != null)
+            tvPercent.setText(String.format(java.util.Locale.US, "%d%%", percent));
+        if (tvRemaining != null)
+            tvRemaining.setText(String.format(java.util.Locale.US,
+                    "%.2f km left", Math.max(targetKm - km, 0)));
     }
 
     private List<Participant> parseLeaderboard(String json) {
@@ -278,20 +324,17 @@ public class LiveRunActivity extends BaseRunActivity {
             }
 
             if (existingIndex == -1) {
-                // Neuer Teilnehmer
                 participants.add(i, incoming);
                 adapter.notifyItemInserted(i);
             } else {
                 Participant existing = participants.get(existingIndex);
 
-                // Position hat sich geändert → Item verschieben
                 if (existingIndex != i) {
                     participants.remove(existingIndex);
                     participants.add(i, existing);
                     adapter.notifyItemMoved(existingIndex, i);
                 }
 
-                // Werte aktualisieren (auch wenn finished)
                 boolean changed = existing.finished != incoming.finished
                         || existing.km != incoming.km
                         || existing.place != incoming.place;
@@ -315,7 +358,6 @@ public class LiveRunActivity extends BaseRunActivity {
             }
         }
 
-        // Überschüssige Einträge entfernen
         while (participants.size() > newList.size()) {
             int last = participants.size() - 1;
             participants.remove(last);
@@ -326,48 +368,28 @@ public class LiveRunActivity extends BaseRunActivity {
     private void updateRunStats() {
         Log.d("LiveRun", "updateRunStats called");
 
-        if (workout == null) {
-            Log.d("LiveRun", "workout == null");
-            return;
-        }
-
-        if (mTracker == null) {
-            Log.d("LiveRun", "mTracker == null");
-            return;
-        }
-
-        if (formatter == null) {
-            Log.d("LiveRun", "formatter == null");
-            return;
-        }
+        if (workout == null) { Log.d("LiveRun", "workout == null"); return; }
+        if (mTracker == null) { Log.d("LiveRun", "mTracker == null"); return; }
+        if (formatter == null) { Log.d("LiveRun", "formatter == null"); return; }
 
         double time     = workout.getTime(Scope.ACTIVITY);
         double distance = workout.getDistance(Scope.ACTIVITY);
         double pace     = workout.getSpeed(Scope.ACTIVITY);
 
-        Log.d("LiveRun", "TIME = " + time);
-        Log.d("LiveRun", "DIST = " + distance);
-        Log.d("LiveRun", "PACE = " + pace);
-
         activityTime.setText(
-                formatter.formatElapsedTime(
-                        Formatter.Format.TXT_SHORT,
-                        Math.round(time)
-                )
-        );
+                formatter.formatElapsedTime(Formatter.Format.TXT_SHORT, Math.round(time)));
 
-        activityDistance.setText(
-                formatter.formatDistance(
-                        Formatter.Format.TXT_SHORT,
-                        Math.round(distance)
-                )
-        );
+        // Distance und Progressbar nur mit echten GPS-Daten überschreiben
+        // Im Test-Modus (distance == 0) macht updateFakeUI() das stattdessen
+        if (distance > 0) {
+            activityDistance.setText(
+                    formatter.formatDistance(Formatter.Format.TXT_SHORT, Math.round(distance)));
+            double coveredKm = distance / 1000.0;
+            View fill = findViewById(R.id.v_progress_fill);
+            if (fill != null) fill.post(() -> updateFakeUI(coveredKm));
+        }
 
         activityPace.setText(
-                formatter.formatVelocityByPreferredUnit(
-                        Formatter.Format.TXT_SHORT,
-                        pace
-                )
-        );
+                formatter.formatVelocityByPreferredUnit(Formatter.Format.TXT_SHORT, pace));
     }
 }
