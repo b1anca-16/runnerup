@@ -135,6 +135,7 @@
   <string name="Waiting_for_GPS">Waiting for GPS…</string>
   <string name="gps_ready">GPS ready ✓</string>
   <string name="Start_activity">Start activity</string>
+  <string name="Countdown">Countdown</string>
   <string name="Wear_OS_Device">Wear OS device</string>
   <string name="Clear_HR_settings">Clear HR settings</string>
   <string name="Heart_rate_monitor_is_not_supported_for_your_device">This heart rate monitor is not supported on your device</string>

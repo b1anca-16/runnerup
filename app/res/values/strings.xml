@@ -43,4 +43,6 @@
   <string name="finish_congrats_subtitle">Great run - you\'ve completed the distance!</string>
   <string name="label_finished">finished</string>
   <string name="label_still_running">still running</string>
+  <string name="countdown_go">GO!</string>
+  <string name="run_starts_in">Run begins</string>
 </resources>
