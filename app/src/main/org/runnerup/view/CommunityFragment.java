@@ -16,6 +16,7 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import org.runnerup.R;
 import org.runnerup.tracker.LiveChallenge;
+import org.runnerup.view.CommunityAudioService;
 
 public class CommunityFragment extends Fragment {
 
@@ -39,16 +40,21 @@ public class CommunityFragment extends Fragment {
                 LiveChallenge.getInstance().connectAndCreate(playerName, distance,new LiveChallenge.OnTokenReceived() {
                     @Override
                     public void onToken(String token) {
+                        Log.d(TAG, "Run created, token: " + token);
+                        CommunityAudioService.getInstance(requireContext().getApplicationContext()).announceRunCreated(runName);
                         openWaitingRoom(token, runName, playerName, "HOST", distance);
                     }
                     @Override
-                    public void onPartnerJoined() {
+                    public void onPartnerJoined(String partnerName) {
+                        Log.d(TAG, "Partner joined: " + partnerName);
                         showToast("Partner ist beigetreten! 🏃");
+                        CommunityAudioService.getInstance(requireContext().getApplicationContext()).announcePartnerJoined(partnerName);
                     }
                     @Override
                     public void onError(String message) {
                         Log.e(TAG, "Fehler: " + message);
                         showToast("Fehler: " + message);
+                        CommunityAudioService.getInstance(requireContext().getApplicationContext()).announceConnectionLost();
                     }
                 });
             }
@@ -69,15 +75,22 @@ public class CommunityFragment extends Fragment {
                 LiveChallenge.getInstance().connectAndJoin(code, playerName, new LiveChallenge.OnTokenReceived() {
                     @Override
                     public void onToken(String token) {
-                        openWaitingRoom(token, null, playerName, "JOIN", 0f);
+                        String hostName = LiveChallenge.getInstance().getHostName();
+                        String runName = LiveChallenge.getInstance().getRunName();
+                        Log.d(TAG, "Joined run: " + runName + " by " + hostName);
+                        CommunityAudioService.getInstance(requireContext().getApplicationContext()).announceYouJoined(runName, hostName);
+                        openWaitingRoom(token, runName, playerName, "JOIN", 0f);
                     }
                     @Override
-                    public void onPartnerJoined() {
+                    public void onPartnerJoined(String partnerName) {
+                        Log.d(TAG, "Partner joined: " + partnerName);
                         showToast("Partner ist beigetreten! 🏃");
+                        CommunityAudioService.getInstance(requireContext().getApplicationContext()).announcePartnerJoined(partnerName);
                     }
                     @Override
                     public void onError(String message) {
                         showToast("Fehler: " + message);
+                        CommunityAudioService.getInstance(requireContext().getApplicationContext()).announceConnectionLost();
                     }
                 });
             }

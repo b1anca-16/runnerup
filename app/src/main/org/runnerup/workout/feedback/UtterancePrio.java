@@ -18,7 +18,7 @@
 package org.runnerup.workout.feedback;
 
 // Higher prio will interrupt (flush) lower prio.
-enum UtterancePrio {
+public enum UtterancePrio {
   PRIO_CUE(0),
   PRIO_COACH(1),
   PRIO_COUNTDOWN(2);

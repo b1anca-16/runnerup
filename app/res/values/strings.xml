@@ -28,4 +28,14 @@
   <string name="wait_host">Wait until the host starts the run</string>
     <string name="run_distance">Distance</string>
   <string name="distance_placeholder">Distance: %.1f km</string>
+  <string name="community_run_started">The run has started. Good luck!</string>
+  <string name="community_run_created">You have created a run named %s</string>
+  <string name="community_run_ended">The run has ended. Well done!</string>
+  <string name="community_partner_joined_generic">A partner has joined</string>
+  <string name="community_partner_joined_name">%s has joined</string>
+  <string name="community_partner_joined_your_run">%s has joined your run</string>
+  <string name="community_you_joined">You have joined %s\'s run</string>
+  <string name="community_you_joined_full">You joined the %1$s from %2$s</string>
+  <string name="community_connection_lost">Connection to server lost.</string>
+  <string name="community_partner_ahead">%s is now ahead of you!</string>
 </resources>

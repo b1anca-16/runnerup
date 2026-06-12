@@ -99,8 +99,7 @@ public class RUTextToSpeech {
     return textToSpeech != null;
   }
 
-  @SuppressWarnings("UnusedReturnValue")
-  int speak(String text, UtterancePrio prio, boolean flush, HashMap<String, String> params) {
+  public int speak(String text, UtterancePrio prio, boolean flush, HashMap<String, String> params) {
     if (!isAvailable()) {
       return 0;
     }

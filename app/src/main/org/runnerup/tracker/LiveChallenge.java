@@ -24,12 +24,14 @@ public class LiveChallenge {
 
     private WebSocket ws;
     private String roomId;
+    private String hostName;
+    private String runName;
     private OnTokenReceived tokenCallback;
     private List<String> lastParticipants = new ArrayList<>();
 
     public interface OnTokenReceived {
         void onToken(String token);
-        void onPartnerJoined();
+        void onPartnerJoined(String partnerName);
         void onError(String message);
     }
 
@@ -44,6 +46,14 @@ public class LiveChallenge {
         if (!lastParticipants.isEmpty()) {
             postToMain(() -> callback.onParticipantsUpdated(lastParticipants));
         }
+    }
+
+    public String getHostName() {
+        return hostName;
+    }
+
+    public String getRunName() {
+        return runName;
     }
 
     public static LiveChallenge getInstance() {
@@ -96,6 +106,13 @@ public class LiveChallenge {
             String token = extractToken(text);
             roomId = token;
 
+            if (text.contains("\"host\":")) {
+                hostName = text.split("\"host\":\"")[1].split("\"")[0];
+            }
+            if (text.contains("\"runName\":")) {
+                runName = text.split("\"runName\":\"")[1].split("\"")[0];
+            }
+
             // Teilnehmer direkt aus der Antwort lesen falls vorhanden
             if (text.contains("\"participants\"")) {
                 List<String> names = extractParticipants(text.replace("\"participants\"", "\"list\""));
@@ -106,7 +123,12 @@ public class LiveChallenge {
             postToMain(() -> { if (tokenCallback != null) tokenCallback.onToken(token); });
 
         } else if (text.contains("\"action\":\"partner_joined\"")) {
-            postToMain(() -> { if (tokenCallback != null) tokenCallback.onPartnerJoined(); });
+            String partnerName = null;
+            if (text.contains("\"name\":")) {
+                partnerName = text.split("\"name\":\"")[1].split("\"")[0];
+            }
+            final String finalPartnerName = partnerName;
+            postToMain(() -> { if (tokenCallback != null) tokenCallback.onPartnerJoined(finalPartnerName); });
 
         } else if (text.contains("\"action\":\"error\"")) {
             postToMain(() -> { if (tokenCallback != null) tokenCallback.onError("Room nicht gefunden"); });
