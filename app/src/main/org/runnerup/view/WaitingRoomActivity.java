@@ -68,17 +68,26 @@ public class WaitingRoomActivity extends AppCompatActivity {
         ((ListView) findViewById(R.id.lv_participants)).setAdapter(adapter);
 
         // 2. Callback registrieren ← HIER
-        org.runnerup.tracker.LiveChallenge.getInstance().setParticipantCallback(names -> {
-            participants.clear();
-            participants.addAll(names);
-            adapter.notifyDataSetChanged();
+        org.runnerup.tracker.LiveChallenge.getInstance().setParticipantCallback(new org.runnerup.tracker.LiveChallenge.OnParticipantsChanged() {
+            @Override
+            public void onParticipantsUpdated(java.util.List<String> names) {
+                participants.clear();
+                participants.addAll(names);
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onRunStarted() {
+                CommunityAudioService.getInstance(getApplicationContext()).announceRunStarted();
+                Intent intent = new Intent(WaitingRoomActivity.this, ActiveRunActivity.class);
+                intent.putExtra(ActiveRunActivity.EXTRA_RUN_NAME, runName);
+                startActivity(intent);
+                finish();
+            }
         });
 
         ((Button) findViewById(R.id.btn_start_run)).setOnClickListener(v -> {
-            Intent intent = new Intent(this, ActiveRunActivity.class);
-            intent.putExtra(ActiveRunActivity.EXTRA_RUN_NAME, runName);
-            startActivity(intent);
-            finish();
+            org.runnerup.tracker.LiveChallenge.getInstance().sendStartRun();
         });
     }
 }

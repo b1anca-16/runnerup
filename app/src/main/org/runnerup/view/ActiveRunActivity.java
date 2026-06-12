@@ -8,13 +8,12 @@ import android.widget.ListView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
-
+import androidx.core.view.WindowInsetsCompat;
 import org.runnerup.R;
-
 import java.util.ArrayList;
 import java.util.List;
-import androidx.core.view.WindowInsetsCompat;
 
 public class ActiveRunActivity extends AppCompatActivity {
 
@@ -33,13 +32,13 @@ public class ActiveRunActivity extends AppCompatActivity {
         setContentView(R.layout.active_run);
 
         ViewCompat.setOnApplyWindowInsetsListener(
-                findViewById(android.R.id.content), (v, insets) -> {
-                    int top = insets.getInsets(WindowInsetsCompat.Type.systemBars()).top;
+                findViewById(R.id.active_run_root), (v, insets) -> {
+                    Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
                     v.setPadding(
                             v.getPaddingLeft(),
-                            top,
+                            systemBars.top,
                             v.getPaddingRight(),
-                            v.getPaddingBottom()
+                            systemBars.bottom
                     );
                     return insets;
                 });
@@ -73,6 +72,11 @@ public class ActiveRunActivity extends AppCompatActivity {
         pauseButton.setOnClickListener(v -> {
             isPaused = !isPaused;
             updatePauseButton();
+        });
+
+        stopButton.setOnClickListener(v -> {
+            CommunityAudioService.getInstance(getApplicationContext()).announceRunEnded();
+            finish();
         });
 
         updatePauseButton();

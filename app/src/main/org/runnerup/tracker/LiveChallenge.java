@@ -37,6 +37,7 @@ public class LiveChallenge {
 
     public interface OnParticipantsChanged {
         void onParticipantsUpdated(List<String> names);
+        void onRunStarted();
     }
 
     private OnParticipantsChanged participantCallback;
@@ -71,6 +72,10 @@ public class LiveChallenge {
     public void connectAndJoin(String roomCode, String playerName, OnTokenReceived callback) {
         this.tokenCallback = callback;
         connectInternal(() -> send("{\"action\":\"join\",\"room\":\"" + roomCode + "\",\"name\":\"" + playerName + "\"}"));
+    }
+
+    public void sendStartRun() {
+        send("{\"action\":\"start\",\"room\":\"" + roomId + "\"}");
     }
 
     private void connectInternal(Runnable onOpen) {
@@ -137,6 +142,8 @@ public class LiveChallenge {
             List<String> names = extractParticipants(text);
             lastParticipants = names;
             postToMain(() -> { if (participantCallback != null) participantCallback.onParticipantsUpdated(names); });
+        } else if (text.contains("\"action\":\"started\"")) {
+            postToMain(() -> { if (participantCallback != null) participantCallback.onRunStarted(); });
         }
     }
 

@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="community_run_started">Der Lauf hat begonnen. Viel Glück!</string>
-  <string name="community_run_created">Du hast einen Lauf namens %s erstellt</string>
+  <string name="community_run_created">Lauf %s erstellt</string>
   <string name="community_run_ended">Der Lauf ist beendet. Gut gemacht!</string>
   <string name="community_partner_joined_generic">Ein Partner ist beigetreten</string>
   <string name="community_partner_joined_name">%s ist beigetreten</string>
+  <string name="community_partner_joined_your_run">%s ist dem Lauf beigetreten</string>
   <string name="community_you_joined">Du bist dem Lauf von %s beigetreten</string>
+  <string name="community_you_joined_full">Du bist dem Lauf %1$s von %2$s beigetreten</string>
   <string name="community_connection_lost">Verbindung zum Server verloren.</string>
   <string name="community_partner_ahead">%s ist jetzt vor dir!</string>
 </resources>

@@ -59,6 +59,14 @@ public class CommunityAudioService {
         speak(appContext.getString(R.string.community_run_created, runName));
     }
 
+    public void announceRunStarted() {
+        speak(appContext.getString(R.string.community_run_started));
+    }
+
+    public void announceRunEnded() {
+        speak(appContext.getString(R.string.community_run_ended));
+    }
+
     public void announcePartnerJoined(String partnerName) {
         if (partnerName == null) {
             speak(appContext.getString(R.string.community_partner_joined_generic));

@@ -170,11 +170,18 @@ public class RUTextToSpeech {
 
     int mode = TextToSpeech.QUEUE_ADD;
     int maxPrio = cueList.get(0).prio;
+    boolean forceFlush = false;
+    for (Entry e : cueList) {
+        if (e.flush) {
+            forceFlush = true;
+            break;
+        }
+    }
 
     // Check outstanding.
     if (!outstanding.isEmpty()) {
       int outstandingPrio = getMaxOutstandingPrio();
-      if (maxPrio >= outstandingPrio) {
+      if (forceFlush || maxPrio > outstandingPrio) {
         mode = TextToSpeech.QUEUE_FLUSH;
         outstanding.clear();
       }
