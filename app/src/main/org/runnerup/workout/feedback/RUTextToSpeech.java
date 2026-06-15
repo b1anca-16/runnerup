@@ -34,9 +34,10 @@ public class RUTextToSpeech {
 
   private static final String UTTERANCE_ID = "RUTextTospeech";
   private final boolean mute;
-  private final TextToSpeech textToSpeech;
+  private TextToSpeech textToSpeech;
   private final AudioManager audioManager;
   private final AtomicBoolean hasAudioFocus = new AtomicBoolean(false);
+  private final AtomicBoolean initialized = new AtomicBoolean(false);
   private long id = (long) (System.nanoTime() + (1000 * Math.random()));
 
   class Entry {
@@ -57,6 +58,39 @@ public class RUTextToSpeech {
 
   private final HashSet<String> cueSet = new HashSet<>();
   private final ArrayList<Entry> cueList = new ArrayList<>();
+
+  public RUTextToSpeech(Context context, boolean mute_) {
+    this.audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+    this.mute = mute_;
+    this.textToSpeech = new TextToSpeech(context, status -> {
+      if (status == TextToSpeech.SUCCESS) {
+        Locale locale = Formatter.getAudioLocale(context);
+        if (textToSpeech != null && locale != null) {
+          int res;
+          switch ((res = textToSpeech.isLanguageAvailable(locale))) {
+            case TextToSpeech.LANG_AVAILABLE:
+            case TextToSpeech.LANG_COUNTRY_AVAILABLE:
+            case TextToSpeech.LANG_COUNTRY_VAR_AVAILABLE:
+              res = textToSpeech.setLanguage(locale);
+              Log.d(getClass().getName(), "setLanguage(" + locale.getDisplayLanguage() + ") => " + res);
+              break;
+            case TextToSpeech.LANG_MISSING_DATA:
+            case TextToSpeech.LANG_NOT_SUPPORTED:
+              Log.v(
+                      getClass().getName(),
+                      "setLanguage(" + locale.getDisplayLanguage() + ") => MISSING: " + res);
+              break;
+          }
+        }
+        UtteranceCompletion.setUtteranceCompletedListener(textToSpeech, this);
+        initialized.set(true);
+        // Emit any queued messages once initialized
+        emit();
+      } else {
+        Log.e(getClass().getName(), "TTS Initialization failed!");
+      }
+    });
+  }
 
   public RUTextToSpeech(TextToSpeech tts, boolean mute_, Context context) {
     this.textToSpeech = tts;
@@ -81,9 +115,8 @@ public class RUTextToSpeech {
       }
     }
 
-    if (this.mute) {
-      UtteranceCompletion.setUtteranceCompletedListener(tts, this);
-    }
+    UtteranceCompletion.setUtteranceCompletedListener(tts, this);
+    initialized.set(true);
   }
 
   private String getId(String text) {
@@ -154,8 +187,17 @@ public class RUTextToSpeech {
     audioManager.abandonAudioFocus(null);
   }
 
+  public void emit(String text, boolean flush) {
+      emit(text, UtterancePrio.MEDIUM, flush);
+  }
+
+  public void emit(String text, UtterancePrio prio, boolean flush) {
+    speak(text, prio, flush, null);
+    emit();
+  }
+
   public void emit() {
-    if (!isAvailable()) {
+    if (!isAvailable() || !initialized.get()) {
       return;
     }
     if (cueSet.isEmpty()) {
@@ -209,6 +251,13 @@ public class RUTextToSpeech {
     cueSet.clear();
     cueList.clear();
     maybeAbandonAudioFocus();
+  }
+
+  public void stop() {
+    if (textToSpeech != null) {
+      textToSpeech.stop();
+      textToSpeech.shutdown();
+    }
   }
 
   int getMaxOutstandingPrio() {

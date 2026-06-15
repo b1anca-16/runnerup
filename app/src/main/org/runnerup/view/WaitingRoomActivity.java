@@ -52,6 +52,7 @@ public class WaitingRoomActivity extends AppCompatActivity {
     private String playerName;
     private Button startButton;
     private float distance = 5.0f;
+    private CommunityAudioService communityAudioService;
 
 
     private final ServiceConnection mConnection = new ServiceConnection() {
@@ -147,6 +148,8 @@ public class WaitingRoomActivity extends AppCompatActivity {
         String token      = getIntent().getStringExtra(EXTRA_TOKEN);
         distance = getIntent().getFloatExtra(EXTRA_DISTANCE, 5f);
 
+        communityAudioService = new CommunityAudioService(this);
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(runName);
         }
@@ -188,6 +191,14 @@ public class WaitingRoomActivity extends AppCompatActivity {
 
         // 2. Callback registrieren ← HIER
         org.runnerup.tracker.LiveChallenge.getInstance().setParticipantCallback(names -> {
+            if (names.size() > participants.size()) {
+                // Someone joined
+                for (String name : names) {
+                    if (!participants.contains(name)) {
+                        communityAudioService.announceJoin(name);
+                    }
+                }
+            }
             participants.clear();
             participants.addAll(names);
             adapter.notifyDataSetChanged();
@@ -195,6 +206,7 @@ public class WaitingRoomActivity extends AppCompatActivity {
 
         LiveChallenge.getInstance().setRunStartedListener(() -> {
             Log.d("WaitingRoom", "RunStartedListener fired!");
+            communityAudioService.announceStart();
             runStartRequested = true;
             runOnUiThread(this::tryStartRun);
         });
@@ -207,6 +219,9 @@ public class WaitingRoomActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (communityAudioService != null) {
+            communityAudioService.stop();
+        }
         if (mIsBound) {
             getApplicationContext().unbindService(mConnection);
             mIsBound = false;

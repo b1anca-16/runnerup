@@ -20,10 +20,13 @@ import org.runnerup.tracker.LiveChallenge;
 public class CommunityFragment extends Fragment {
 
     private static final String TAG = "CommunityFragment";
+    private CommunityAudioService communityAudioService;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_community, container, false);
+
+        communityAudioService = new CommunityAudioService(requireContext());
 
         view.findViewById(R.id.btn_create_run).setOnClickListener(v -> showCreateDialog());
         view.findViewById(R.id.btn_join_run).setOnClickListener(v -> showJoinDialog());
@@ -39,15 +42,18 @@ public class CommunityFragment extends Fragment {
                 LiveChallenge.getInstance().connectAndCreate(playerName, runName, distance, new LiveChallenge.OnTokenReceived() {
                     @Override
                     public void onToken(String token, String receivedRunName) {  // ← neu
+                        communityAudioService.announceCreate(runName);
                         openWaitingRoom(token, runName, playerName, "HOST", distance);
                     }
                     @Override
                     public void onPartnerJoined() {
+                        communityAudioService.announcePartnerJoined();
                         showToast("Partner ist beigetreten! 🏃");
                     }
                     @Override
                     public void onError(String message) {
                         Log.e(TAG, "Fehler: " + message);
+                        communityAudioService.announceError(message);
                         showToast("Fehler: " + message);
                     }
                 });
@@ -69,20 +75,31 @@ public class CommunityFragment extends Fragment {
                 LiveChallenge.getInstance().connectAndJoin(code, playerName, new LiveChallenge.OnTokenReceived() {
                     @Override
                     public void onToken(String token, String receivedRunName) {  // ← runName kommt jetzt vom Server
+                        communityAudioService.announceJoinSuccess(receivedRunName);
                         openWaitingRoom(token, receivedRunName, playerName, "JOIN", 0f);
                     }
                     @Override
                     public void onPartnerJoined() {
+                        communityAudioService.announcePartnerJoined();
                         showToast("Partner ist beigetreten! 🏃");
                     }
                     @Override
                     public void onError(String message) {
+                        communityAudioService.announceError(message);
                         showToast("Fehler: " + message);
                     }
                 });
             }
         });
         dialog.show(getParentFragmentManager(), "join_run_dialog");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (communityAudioService != null) {
+            communityAudioService.stop();
+        }
     }
 
     private void openWaitingRoom(String token, String runName, String playerName, String role, float distance) {

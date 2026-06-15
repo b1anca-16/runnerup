@@ -56,6 +56,7 @@ public class LiveRunActivity extends BaseRunActivity {
     private String ownName;
     private ImageView finishedFlag;
     private double fakeCurrentKm = 0.0;
+    private CommunityAudioService communityAudioService;
 
     private boolean isOwnRunFinished() {
         for (Participant p : participants) {
@@ -91,6 +92,8 @@ public class LiveRunActivity extends BaseRunActivity {
         if (getSupportActionBar() != null && runName != null) {
             getSupportActionBar().setTitle(runName);
         }
+
+        communityAudioService = new CommunityAudioService(this);
 
         bindViews();
         setupParticipantsList();
@@ -157,6 +160,10 @@ public class LiveRunActivity extends BaseRunActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        if (communityAudioService != null) {
+            communityAudioService.stop();
+        }
 
         sendingProgress = false;
         progressHandler.removeCallbacksAndMessages(null);
@@ -343,6 +350,13 @@ public class LiveRunActivity extends BaseRunActivity {
                         || existing.place != incoming.place;
 
                 if (changed) {
+                    if (!existing.finished && incoming.finished) {
+                        communityAudioService.announceFinished(incoming.name, incoming.place);
+                    }
+                    if (ownName != null && incoming.name.equals(ownName) && existing.place != incoming.place) {
+                        communityAudioService.announceRank(incoming.place);
+                    }
+
                     existing.km       = incoming.km;
                     existing.finished = incoming.finished;
                     existing.place    = incoming.place;
