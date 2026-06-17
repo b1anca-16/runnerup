@@ -41,9 +41,9 @@ public class CommunityFragment extends Fragment {
             public void onCreate(String playerName, String runName, float distance) {
                 LiveChallenge.getInstance().connectAndCreate(playerName, runName, distance, new LiveChallenge.OnTokenReceived() {
                     @Override
-                    public void onToken(String token, String receivedRunName) {  // ← neu
-                        communityAudioService.announceCreate(runName);
-                        openWaitingRoom(token, runName, playerName, "HOST", distance);
+                    public void onToken(String token, String receivedRunName, float receivedDistance) {
+                        communityAudioService.announceCreate(receivedRunName);
+                        openWaitingRoom(token, receivedRunName, playerName, "HOST", receivedDistance);
                     }
                     @Override
                     public void onPartnerJoined() {
@@ -74,9 +74,9 @@ public class CommunityFragment extends Fragment {
             public void onJoin(String playerName, String code) {
                 LiveChallenge.getInstance().connectAndJoin(code, playerName, new LiveChallenge.OnTokenReceived() {
                     @Override
-                    public void onToken(String token, String receivedRunName) {  // ← runName kommt jetzt vom Server
-                        communityAudioService.announceJoinSuccess(receivedRunName);
-                        openWaitingRoom(token, receivedRunName, playerName, "JOIN", 0f);
+                    public void onToken(String token, String receivedRunName, float receivedDistance) {
+                        communityAudioService.announceCreate(receivedRunName);
+                        openWaitingRoom(token, receivedRunName, playerName, "JOIN", receivedDistance);
                     }
                     @Override
                     public void onPartnerJoined() {

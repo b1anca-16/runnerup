@@ -108,6 +108,7 @@ public class WaitingRoomActivity extends AppCompatActivity {
         intent.putExtra(CountdownActivity.EXTRA_RUN_NAME, runName);
         intent.putExtra(CountdownActivity.EXTRA_PLAYER_NAME, playerName);
         intent.putExtra(CountdownActivity.EXTRA_TOKEN, getIntent().getStringExtra(EXTRA_TOKEN));
+        intent.putExtra("DISTANCE", distance);
         startActivity(intent);
         finish();
     }

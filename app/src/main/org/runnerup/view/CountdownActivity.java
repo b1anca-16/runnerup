@@ -123,11 +123,18 @@ public class CountdownActivity extends AppCompatActivity {
 
     private void launchLiveRun() {
         if (mTracker != null) mTracker.start();
+
         Intent intent = new Intent(this, LiveRunActivity.class);
+
         intent.putExtra(LiveRunActivity.EXTRA_RUN_NAME,
                 getIntent().getStringExtra(EXTRA_RUN_NAME));
+
         intent.putExtra("PLAYER_NAME",
                 getIntent().getStringExtra(EXTRA_PLAYER_NAME));
+
+        intent.putExtra("DISTANCE",
+                getIntent().getFloatExtra("DISTANCE", 5.0f));
+
         startActivity(intent);
         finish();
     }

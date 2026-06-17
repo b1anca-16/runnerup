@@ -28,7 +28,7 @@ public class LiveChallenge {
     private List<String> lastParticipants = new ArrayList<>();
 
     public interface OnTokenReceived {
-        void onToken(String token, String runName);
+        void onToken(String token, String runName, float distance);  // ← Parameter ergänzt
         void onPartnerJoined();
         void onError(String message);
     }
@@ -127,9 +127,17 @@ public class LiveChallenge {
             String runName = text.contains("\"runName\"")
                     ? text.split("\"runName\":\"")[1].split("\"")[0]
                     : "";
+            float distance = 0f;
+            if (text.contains("\"distance\"")) {
+                try {
+                    distance = Float.parseFloat(text.split("\"distance\":")[1].split("[,}]")[0].trim());
+                } catch (Exception e) {
+                    Log.e(TAG, "Fehler beim Parsen der Distance: " + e.getMessage());
+                }
+            }
             roomId = token;
 
-            // Teilnehmer direkt aus der Antwort lesen falls vorhanden
+            // Teilnehmer direkt aus der Antwort lesen, falls vorhanden
             if (text.contains("\"participants\"")) {
                 List<String> names = extractParticipants(text.replace("\"participants\"", "\"list\""));
                 lastParticipants = names;
@@ -137,7 +145,8 @@ public class LiveChallenge {
             }
 
             final String finalRunName = runName;
-            postToMain(() -> { if (tokenCallback != null) tokenCallback.onToken(token, finalRunName); });
+            final float finalDistance = distance;
+            postToMain(() -> { if (tokenCallback != null) tokenCallback.onToken(token, finalRunName, finalDistance); });
 
         } else if (text.contains("\"action\":\"partner_joined\"")) {
             postToMain(() -> { if (tokenCallback != null) tokenCallback.onPartnerJoined(); });
