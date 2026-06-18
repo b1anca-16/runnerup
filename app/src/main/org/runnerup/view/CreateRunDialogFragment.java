@@ -48,8 +48,10 @@ public class CreateRunDialogFragment extends DialogFragment {
         EditText etDistance = view.findViewById(R.id.et_distance);
         Button btnCancel      = view.findViewById(R.id.btn_cancel);
         Button btnConfirm     = view.findViewById(R.id.btn_confirm);
+        TextView tvTitle = view.findViewById(R.id.tv_title);
 
         if (mode == Mode.JOIN) {
+            tvTitle.setText("Join Run");
             etRunName.setHint("Room Code");
             btnConfirm.setText("Join");
         }
