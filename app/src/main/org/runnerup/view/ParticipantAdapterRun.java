@@ -48,9 +48,11 @@ public class ParticipantAdapterRun extends RecyclerView.Adapter<ParticipantAdapt
                                  @NonNull List<Object> payloads) {
         if (!payloads.isEmpty() && "km_update".equals(payloads.get(0))
                 && !data.get(position).finished) {
+            LiveRunActivity.Participant p = data.get(position);
             holder.km.setText(
-                    String.format(Locale.getDefault(), "%.2f km", data.get(position).km)
+                    String.format(Locale.getDefault(), "%.2f km", p.km)
             );
+            holder.name.setText(p.place + ". " + p.name);
         } else {
             onBindViewHolder(holder, position);
         }
