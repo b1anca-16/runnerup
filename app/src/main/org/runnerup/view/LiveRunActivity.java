@@ -322,6 +322,7 @@ public class LiveRunActivity extends BaseRunActivity {
     }
 
     private void updateParticipantsDiff(List<Participant> newList) {
+        boolean anyChange = false;
         for (int i = 0; i < newList.size(); i++) {
             Participant incoming = newList.get(i);
 
@@ -350,6 +351,7 @@ public class LiveRunActivity extends BaseRunActivity {
                         || existing.place != incoming.place;
 
                 if (changed) {
+                    anyChange = true;
                     if (!existing.finished && incoming.finished) {
                         communityAudioService.announceFinished(incoming.name, incoming.place);
                     }
@@ -379,6 +381,11 @@ public class LiveRunActivity extends BaseRunActivity {
             int last = participants.size() - 1;
             participants.remove(last);
             adapter.notifyItemRemoved(last);
+            anyChange = true;
+        }
+
+        if (anyChange) {
+            updateFinishCounters();
         }
     }
 
@@ -410,12 +417,25 @@ public class LiveRunActivity extends BaseRunActivity {
                 formatter.formatVelocityByPreferredUnit(Formatter.Format.TXT_SHORT, pace));
     }
 
-    private void showFinishState() {
+    private void updateFinishCounters() {
+        int finishedCount = 0;
+        int runningCount = 0;
+        for (Participant p : participants) {
+            if (p.finished) finishedCount++;
+            else runningCount++;
+        }
 
+        TextView tvFinished = findViewById(R.id.tv_finished_count);
+        TextView tvRunning  = findViewById(R.id.tv_running_count);
+        if (tvFinished != null) tvFinished.setText(String.valueOf(finishedCount));
+        if (tvRunning  != null) tvRunning .setText(String.valueOf(runningCount));
+    }
+
+    private void showFinishState() {
         View finishBlock = findViewById(R.id.layout_finish_block);
         if (finishBlock != null) finishBlock.setVisibility(View.VISIBLE);
 
-        // Eigenen Eintrag zuerst als finished markieren
+        // Eigenen Eintrag als finished markieren
         for (int i = 0; i < participants.size(); i++) {
             if (ownName != null && ownName.equals(participants.get(i).name)) {
                 participants.get(i).finished = true;
@@ -424,27 +444,11 @@ public class LiveRunActivity extends BaseRunActivity {
             }
         }
 
-        // Danach zählen
-        int finishedCount = 0;
-        int runningCount = 0;
-
-        for (Participant p : participants) {
-            if (p.finished) {
-                finishedCount++;
-            } else {
-                runningCount++;
-            }
-        }
-
-        TextView tvFinished = findViewById(R.id.tv_finished_count);
-        TextView tvRunning = findViewById(R.id.tv_running_count);
-
-        if (tvFinished != null) tvFinished.setText(String.valueOf(finishedCount));
-        if (tvRunning != null) tvRunning.setText(String.valueOf(runningCount));
+        // Zähler über die gemeinsame Methode aktualisieren
+        updateFinishCounters();
 
         // Buttons umschalten
         if (workout != null && !workout.isPaused()) togglePauseState();
-
         stopButton.setVisibility(View.GONE);
         leaveButton.setVisibility(View.VISIBLE);
     }
